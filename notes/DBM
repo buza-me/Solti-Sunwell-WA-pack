@@ -1,0 +1,3 @@
+DBM.AddSpecialWarning("text", withShake, withFlash)
+
+Combat Functions

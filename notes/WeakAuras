@@ -1,0 +1,18 @@
+Custom text function:
+https://github.com/WeakAuras/WeakAuras2/wiki/Text-Replacements
+
+function()
+    if aura_env.states and aura_env.states[2] then
+    --Just the normal nil checking required, 
+    -- as you would always need to when digging into a table's children
+        return aura_env.states[2].stacks
+    end
+en
+
+function(expirationTime, rawDuration, progress, formattedDuration, name, icon, stacks)
+  -- some code
+  -- The first two values passed in are the raw values set by the duration info from the trigger(s), and have not been formatted.
+  -- The last 5, on the other hand values are precisely the strings that replace %p, %t, %n, %i, and %s, respectively. 
+  -- Note that they have already been formatted, so trying to manipulate progress (say, by adding 5 to it) may not have the result you expect.
+  return "some", "strings", "in", "a", "list", "like", "this"
+end

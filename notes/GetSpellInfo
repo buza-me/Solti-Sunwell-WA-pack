@@ -1,0 +1,1 @@
+GetSpellInfo(spellID) returns: name, rank, icon, powerCost, isFunnel, powerType, castingTime, minRange, maxRange

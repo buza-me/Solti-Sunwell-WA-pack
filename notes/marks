@@ -1,0 +1,18 @@
+{
+  [1] = "Star",
+  [2] = "Circle",
+  [3] = "Diamond",
+  [4] = "Triangle",
+  [5] = "Moon",
+  [6] = "Square",
+  [7] = "Cross",
+  [8] = "Skull",
+  ["Star"] = 1,
+  ["Circle"] = 2,
+  ["Diamond"] = 3,
+  ["Triangle"] = 4,
+  ["Moon"] = 5,
+  ["Square"] = 6,
+  ["Cross"] = 7,
+  ["Skull"] = 8,
+}

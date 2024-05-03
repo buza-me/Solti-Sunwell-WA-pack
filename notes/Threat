@@ -1,0 +1,6 @@
+local Threat = LibStub("Threat-2.0")
+
+Threat:GetMaxThreatOnTarget(hostileGUID)
+Threat:GetThreat(teammateGUID, hostileGUID)
+
+local T, t, p = LibStub("Threat-2.0"), UnitGUID("target"), UnitGUID("player"); local M,ID = T:GetMaxThreatOnTarget(t); print(T:GetThreat(p, t) / M,p,ID)
