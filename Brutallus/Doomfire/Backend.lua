@@ -80,6 +80,8 @@ function Trigger1(event, message, sourceName, languageName, channelName, targetN
   local firstTarget = aura_env.firstDoomfireTargetName
   local secondTarget = targetName
 
+  aura_env.firstDoomfireTargetName = nil
+
   if firstTarget == aura_env.SELF_NAME then
     WeakAuras.ScanEvents(
       aura_env.TRIGGER_EVENT,
@@ -97,7 +99,6 @@ function Trigger1(event, message, sourceName, languageName, channelName, targetN
   end
 
   if not aura_env:IsSelfRaidLead() then
-    aura_env.firstDoomfireTargetName = nil
     return false
   end
 
@@ -114,8 +115,6 @@ function Trigger1(event, message, sourceName, languageName, channelName, targetN
   )
 
   SendChatMessage(message, "RAID_WARNING")
-
-  aura_env.firstDoomfireTargetName = nil
 
   return false
 end
