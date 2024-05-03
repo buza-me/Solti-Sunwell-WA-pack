@@ -85,7 +85,7 @@ end
 
 -- expect:
 -- "Timeout 8 was cleared"
--- "index: 4, timeout ID: 9, executed after: ~0.1, original delay: -1"
--- "index: 5, timeout ID: 10, executed after: ~0.1, original delay: 0"
--- "index: 2, timeout ID: 7, executed after: ~1, original delay: 1"
--- "index: 1, timeout ID: 6, executed after: ~3, original delay: 3"
+-- "index: 4, timeout ID: 9, executed after: 0, original delay: -1"
+-- "index: 5, timeout ID: 10, executed after: 0, original delay: 0"
+-- "index: 2, timeout ID: 7, executed after: 1, original delay: 1"
+-- "index: 1, timeout ID: 6, executed after: 3, original delay: 3"
