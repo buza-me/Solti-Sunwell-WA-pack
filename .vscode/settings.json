@@ -22,7 +22,14 @@
     "UnitDebuff",
     "DBM_GENERIC_ENRAGE_WARN",
     "DBM_MIN",
-    "DBM_SEC"
+    "DBM_SEC",
+    "IsRaidLeader",
+    "IsRaidOfficer",
+    "UnitExists"
   ],
-  "Lua.diagnostics.disable": ["duplicate-set-field", "param-type-mismatch"]
+  "Lua.diagnostics.disable": [
+    "duplicate-set-field",
+    "param-type-mismatch",
+    "deprecated"
+  ]
 }
