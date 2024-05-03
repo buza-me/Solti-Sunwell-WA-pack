@@ -85,7 +85,7 @@ function Trigger1(event, message, sourceName, languageName, channelName, targetN
   if firstTarget == aura_env.SELF_NAME then
     WeakAuras.ScanEvents(
       aura_env.TRIGGER_EVENT,
-      secondTarget,
+      aura_env:PaintNameByClass(secondTarget),
       aura_env.DURATION
     )
   end
@@ -93,7 +93,7 @@ function Trigger1(event, message, sourceName, languageName, channelName, targetN
   if secondTarget == aura_env.SELF_NAME then
     WeakAuras.ScanEvents(
       aura_env.TRIGGER_EVENT,
-      firstTarget,
+      aura_env:PaintNameByClass(firstTarget),
       aura_env.DURATION
     )
   end
