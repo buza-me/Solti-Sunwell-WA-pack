@@ -115,6 +115,10 @@ function Init()
   end
 
   function Context:AddTimerInstance(timerTable, func, delay, ...)
+    if type(func) ~= "function" or type(delay) ~= "number" then
+      return nil
+    end
+
     timerTable.counter = timerTable.counter + 1
 
     local instance = {
@@ -131,7 +135,10 @@ function Init()
   end
 
   function Context:RemoveTimerInstance(timerTable, id)
-    for index, instance in pairs(#timerTable.instances) do
+    if type(id) ~= "number" then
+      return
+    end
+    for index, instance in pairs(timerTable.instances) do
       if instance.id == id then
         table.remove(timerTable.instances, index)
       end
@@ -236,15 +243,17 @@ function Init()
       return false
     end
 
-    for index, timeout in pairs(Context._timeouts) do
+    aura_env.lastGameLoopTime = now
+
+    for index, timeout in pairs(Context._timeouts.instances) do
       if now >= timeout.executeAt then
-        table.remove(Context._timeouts, index)
+        table.remove(Context._timeouts.instances, index)
 
         timeout.func(unpack(timeout.arguments))
       end
     end
 
-    for _, interval in pairs(Context._intervals) do
+    for _, interval in pairs(Context._intervals.instances) do
       if now >= interval.executeAt then
         interval.executeAt = now + interval.delay
 
