@@ -63,6 +63,11 @@ function Trigger2(
   end
 
   local unitID = aura_env:GetRaidUnitIDFromName(destName)
+
+  if not unitID then
+    return false
+  end
+
   local raidTargetIndex = GetRaidTargetIndex(unitID)
 
   if raidTargetIndex ~= aura_env.config.firstMarkID and raidTargetIndex ~= aura_env.config.secondMarkID then

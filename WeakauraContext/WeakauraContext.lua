@@ -222,7 +222,7 @@ function Init()
       end
     end
 
-    self:SetTimeout(
+    Context:SetTimeout(
       function()
         SendAddonMessage(
           Context.SUNWELL_PACK_SYNC_MSG_PREFIX,
@@ -249,7 +249,7 @@ function Init()
       if now >= timeout.executeAt then
         table.remove(Context._timeouts.instances, index)
 
-        timeout.func(unpack(timeout.arguments))
+        timeout.func(unpack(timeout.arguments or {}))
       end
     end
 
@@ -257,7 +257,7 @@ function Init()
       if now >= interval.executeAt then
         interval.executeAt = now + interval.delay
 
-        interval.func(unpack(interval.arguments))
+        interval.func(unpack(interval.arguments or {}))
       end
     end
   end
