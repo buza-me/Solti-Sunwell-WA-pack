@@ -14,10 +14,23 @@ function Init()
 
   Context.SUNWELL_PACK_SYNC_MSG_PREFIX = "SOLTI_SUNWELL_WA_CHECK"
   Context.SELF_NAME = UnitName("player")
-  Context.playersWithSunwellPack = Context:UseFallback(Context.playersWithSunwellPack, { [Context.SELF_NAME] = true })
-  Context._paintedNamesCache = Context:UseFallback(Context._paintedNamesCache, {})
-  Context._timeouts = Context:UseFallback(Context._timeouts, { counter = 0, instances = {} })
-  Context._intervals = Context:UseFallback(Context._intervals, { counter = 0, instances = {} })
+
+  Context.playersWithSunwellPack = Context:UseFallback(
+    Context.playersWithSunwellPack,
+    { [Context.SELF_NAME] = true }
+  )
+  Context._paintedNamesCache = Context:UseFallback(
+    Context._paintedNamesCache,
+    {}
+  )
+  Context._timeouts = Context:UseFallback(
+    Context._timeouts,
+    { counter = 0, instances = {} }
+  )
+  Context._intervals = Context:UseFallback(
+    Context._intervals,
+    { counter = 0, instances = {} }
+  )
 
   function Context:IsHeroic()
     local name, instanceType, difficultyID, difficultyName, maxPlayers = GetInstanceInfo()

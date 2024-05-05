@@ -17,7 +17,7 @@ function Init()
   end
 end
 
--- CLEU:SPELL_AURA_APPLIED, CLEU:SPELL_AURA_REFRESH
+-- CLEU:SPELL_AURA_APPLIED
 function Trigger1(
     event,
     timeStamp,
