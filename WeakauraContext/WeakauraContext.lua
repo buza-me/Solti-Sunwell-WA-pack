@@ -19,6 +19,10 @@ function Init()
     Context.playersWithSunwellPack,
     { [Context.SELF_NAME] = true }
   )
+  Context.roster = Context:UseFallback(
+    Context.roster,
+    {}
+  )
   Context._paintedNamesCache = Context:UseFallback(
     Context._paintedNamesCache,
     {}
@@ -31,6 +35,15 @@ function Init()
     Context._intervals,
     { counter = 0, instances = {} }
   )
+
+  function Context:UpdateRoster()
+    self.roster = {}
+    for unitID in WA_IterateGroupMembers() do
+      local unitName = UnitName(unitID)
+      self.roster[unitID] = unitName
+      self.roster[unitName] = unitID
+    end
+  end
 
   function Context:IsHeroic()
     local name, instanceType, difficultyID, difficultyName, maxPlayers = GetInstanceInfo()
@@ -139,7 +152,7 @@ function Init()
       delay = delay,
       executeAt = GetTime() + delay,
       func = func,
-      args = { ... },
+      arguments = { ... },
     }
 
     table.insert(timerTable.instances, instance)
@@ -181,7 +194,7 @@ function Init()
       intervalID = nil,
     }
 
-    state.intervalID = Context:SetInterval(
+    local intervalID = Context:SetInterval(
       function()
         if GetTime() - state.startTime >= 20 then
           Context:ClearInterval(state.intervalID)
@@ -210,6 +223,8 @@ function Init()
       end,
       0
     )
+
+    state.intervalID = intervalID
   end
 
   -----------------------------------------------------------------------------------
@@ -249,6 +264,12 @@ function Init()
     return false
   end
 
+  function aura_env:RAID_ROSTER_UPDATE()
+    Context:UpdateRoster()
+  end
+
+  aura_env:RAID_ROSTER_UPDATE()
+
   function aura_env:OnUpdate()
     local now = GetTime()
 
@@ -262,7 +283,7 @@ function Init()
       if now >= timeout.executeAt then
         table.remove(Context._timeouts.instances, index)
 
-        timeout.func(unpack(timeout.arguments or {}))
+        timeout.func(unpack(timeout.arguments))
       end
     end
 
@@ -270,7 +291,7 @@ function Init()
       if now >= interval.executeAt then
         interval.executeAt = now + interval.delay
 
-        interval.func(unpack(interval.arguments or {}))
+        interval.func(unpack(interval.arguments))
       end
     end
   end
@@ -280,7 +301,7 @@ end
 -------------------------------   TRIGGERS   --------------------------------------
 -----------------------------------------------------------------------------------
 
--- CHAT_MSG_ADDON,PLAYER_REGEN_DISABLED
+-- CHAT_MSG_ADDON,PLAYER_REGEN_DISABLED,RAID_ROSTER_UPDATE
 function Trigger1(event, ...)
   if event == "OPTIONS" then
     return false
