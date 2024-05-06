@@ -6,7 +6,7 @@ function Trigger1(allStates, event, unitID, isSelfTarget, isSelfClose, duration)
 
   duration = duration or 0
 
-  local state = allStates[""] or { autoHide = true, progressType = "timed" }
+  local state = allStates[unitID] or { autoHide = true, progressType = "timed" }
 
   state.show = duration > 0
   state.unit = unitID
@@ -15,8 +15,9 @@ function Trigger1(allStates, event, unitID, isSelfTarget, isSelfClose, duration)
   state.expirationTime = GetTime() + duration
   state.isSelfTarget = not not isSelfTarget
   state.isSelfClose = not not isSelfClose
+  state.index = GetTime()
 
-  allStates[""] = state
+  allStates[unitID] = state
 
   return true
 end

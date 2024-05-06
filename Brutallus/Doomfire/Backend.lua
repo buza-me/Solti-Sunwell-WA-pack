@@ -4,6 +4,7 @@ function Init()
   aura_env.MONSTER_EMOTE_TEMPLATE = " is afflicted by Doomfire!"
   aura_env.TRIGGER_EVENT = "SOLTI_DOOMFIRE_TRIGGER"
   aura_env.MARK_TRIGGER_EVENT = "SOLTI_DOOMFIRE_MARK_TRIGGER"
+  aura_env.RAID_FRAME_ICONS_TRIGGER_EVENT = "SOLTI_DOOMFIRE_RAID_FRAME_ICONS_TRIGGER"
   aura_env.DURATION = 20
   aura_env.SELF_NAME = UnitName("player")
   aura_env.isSelfLinked = false
@@ -23,16 +24,6 @@ function Init()
   }
 
   local paintedNamesCache = {}
-
-  function aura_env:GetRaidUnitIDFromName(name)
-    for i = 1, GetNumRaidMembers() do
-      local raidUnitID = "raid" .. i
-
-      if UnitName(raidUnitID) == name then
-        return raidUnitID
-      end
-    end
-  end
 
   function aura_env:IsSelfRaidLead()
     for i = 1, GetNumRaidMembers() do
@@ -98,14 +89,21 @@ function Trigger1(event, message, sourceName, languageName, channelName, targetN
     )
   end
 
+  WeakAuras.ScanEvents(
+    aura_env.RAID_FRAME_ICONS_TRIGGER_EVENT,
+    firstTarget,
+    secondTarget,
+    aura_env.DURATION
+  )
+
   if not aura_env:IsSelfRaidLead() then
     return false
   end
 
   WeakAuras.ScanEvents(
     aura_env.MARK_TRIGGER_EVENT,
-    aura_env:GetRaidUnitIDFromName(firstTarget),
-    aura_env:GetRaidUnitIDFromName(secondTarget)
+    firstTarget,
+    secondTarget
   )
 
   local message = string.format(

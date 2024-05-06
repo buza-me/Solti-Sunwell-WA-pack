@@ -30,6 +30,10 @@ function Trigger1(
     SendChatMessage(aura_env.config.chatMessage, "SAY")
   end
 
+  if not UnitExists(destName) then
+    return false
+  end
+
   WeakAuras.ScanEvents(
     aura_env.TRIGGER_EVENT,
     destName,
@@ -56,6 +60,10 @@ function Trigger2(
     amount
 )
   if event == "OPTIONS" or (subEvent == "SPELL_AURA_REMOVED" and spellName ~= aura_env.TRACKED_SPELL_NAME) then
+    return false
+  end
+
+  if not UnitExists(destName) then
     return false
   end
 

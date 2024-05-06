@@ -16,9 +16,15 @@ function Trigger1(allStates, event, prefix, text)
   state.show = isDebuffed == 'true'
   state.isSafe = isSafe == 'true'
   state.changed = true
+  state.stacks = tonumber(stacks)
+  state.stacksText = stacks
   state.index = GetTime()
 
   allStates[unitName] = state
 
   return allStates
+end
+
+function Trigger1CustomVariables()
+  return { stacks = "number", stacksText = "string" }
 end

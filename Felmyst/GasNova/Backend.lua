@@ -9,10 +9,11 @@ function Init()
   aura_env.numberOfPlayersNear = 0
   aura_env.lastTriggerExecutionTime = GetTime()
 
-  function aura_env:NotifyUpdateSubscribers(isDebuffed, isSafe)
+  function aura_env:NotifyUpdateSubscribers(isDebuffed, isSafe, numPlayersNear)
     SendAddonMessage(
       aura_env.CHAT_MSG_ADDON_PREFIX,
-      aura_env.SELF_NAME .. " " .. tostring(isDebuffed) .. " " .. tostring(isSafe), "RAID"
+      aura_env.SELF_NAME .. " " .. tostring(isDebuffed) .. " " .. tostring(isSafe) .. " " .. tostring(numPlayersNear),
+      "RAID"
     )
     WeakAuras.ScanEvents(
       aura_env.TRIGGER_EVENT,
@@ -36,7 +37,7 @@ function Trigger1()
   if not aura_env.isDebuffed and aura_env.isBroadcasting then
     aura_env.isBroadcasting = false
     aura_env.numberOfPlayersNear = 0
-    aura_env:NotifyUpdateSubscribers(false, true)
+    aura_env:NotifyUpdateSubscribers(false, true, 0)
     return false
   elseif not aura_env.isDebuffed then
     return false
@@ -57,7 +58,7 @@ function Trigger1()
 
   aura_env.isBroadcasting = true
   aura_env.numberOfPlayersNear = numberOfPlayersNear
-  aura_env:NotifyUpdateSubscribers(true, isSafe)
+  aura_env:NotifyUpdateSubscribers(true, isSafe, aura_env.numberOfPlayersNear)
 
   return false
 end

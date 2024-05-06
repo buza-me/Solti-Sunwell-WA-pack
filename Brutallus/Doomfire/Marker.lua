@@ -2,16 +2,6 @@ function Init()
   aura_env.TRACKED_SPELL_NAME = "Doomfire"
   local SELF_NAME = UnitName("player")
 
-  function aura_env:GetRaidUnitIDFromName(name)
-    for i = 1, GetNumRaidMembers() do
-      local raidUnitID = "raid" .. i
-
-      if UnitName(raidUnitID) == name then
-        return raidUnitID
-      end
-    end
-  end
-
   function aura_env:CanSelfMark()
     for i = 1, GetNumRaidMembers() do
       local name, rank = GetRaidRosterInfo(i)
@@ -62,19 +52,17 @@ function Trigger2(
     return false
   end
 
-  local unitID = aura_env:GetRaidUnitIDFromName(destName)
-
-  if not unitID then
+  if not UnitExists(destName) then
     return false
   end
 
-  local raidTargetIndex = GetRaidTargetIndex(unitID)
+  local raidTargetIndex = GetRaidTargetIndex(destName)
 
   if raidTargetIndex ~= aura_env.config.firstMarkID and raidTargetIndex ~= aura_env.config.secondMarkID then
     return false
   end
 
-  SetRaidTarget(unitID, 0)
+  SetRaidTarget(destName, 0)
 
   return false
 end

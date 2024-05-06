@@ -1,20 +1,21 @@
 -- SOLTI_BURN_TRIGGER
-function Trigger1(allStates, event, unitID, duration)
-  if event == "OPTIONS" or not UnitExists(unitID) then
+function Trigger1(allStates, event, unitName, duration)
+  if event == "OPTIONS" or not UnitExists(unitName) then
     return false
   end
 
   duration = duration or 0
 
-  local state = allStates[""] or { autoHide = true, progressType = "timed" }
+  local state = allStates[unitName] or { autoHide = true, progressType = "timed" }
 
-  state.unit = unitID
+  state.unit = unitName
   state.changed = true
   state.show = duration > 0
   state.duration = duration
   state.expirationTime = GetTime() + duration
+  state.index = GetTime()
 
-  allStates[""] = state
+  allStates[unitName] = state
 
   return true
 end
