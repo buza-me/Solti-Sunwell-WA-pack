@@ -19,5 +19,7 @@ local trigger1CustomVariables =
 { isSafe = "bool" }
 
 function CustomCodeCondition()
-  DBM.AddSpecialWarning("", true, true)
+  if DBM then
+    DBM.AddSpecialWarning("", true, true)
+  end
 end

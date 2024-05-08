@@ -20,6 +20,5 @@ function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duratio
   return true
 end
 
-function Trigger1CustomVariables()
-  return { isSelfTarget = "bool", isSelfClose = "bool" }
-end
+local Trigger1CustomVariables =
+{ isSelfTarget = "bool", isSelfClose = "bool" }

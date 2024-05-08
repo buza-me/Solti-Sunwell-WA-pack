@@ -24,5 +24,7 @@ local trigger1CustomVariables =
 { isSelfTarget = "bool", isSelfClose = "bool" }
 
 function CustomCodeCondition()
-  DBM.AddSpecialWarning("", true, true)
+  if DBM then
+    DBM.AddSpecialWarning("", true, true)
+  end
 end

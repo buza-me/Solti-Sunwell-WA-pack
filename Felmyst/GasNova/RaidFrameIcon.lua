@@ -27,8 +27,8 @@ function Trigger1(allStates, event, prefix, text)
   state.show = isDebuffed == 'true'
   state.isSafe = isSafe == 'true'
   state.changed = true
-  state.stacks = tonumber(stacks or 0)
-  state.stacksText = stacks or ""
+  state.stacks = tonumber(stacks or -1)
+  state.stacksText = stacks or "unknown"
   state.index = GetTime()
 
   allStates[unitID] = state
@@ -47,4 +47,8 @@ function Trigger2(allStates, event, unitName, duration)
     unitName,
     duration
   )
+end
+
+function TriggerFn(t)
+  return t[2]
 end
