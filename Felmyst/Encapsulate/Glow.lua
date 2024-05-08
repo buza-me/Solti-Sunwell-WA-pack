@@ -1,21 +1,23 @@
+function Init()
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
+end
+
 -- SOLTI_ENCAPSULATE_TRIGGER
-function Trigger1(allStates, event, unitID, isSelfTarget, isSelfClose, duration, expirationTime)
-  if event == "OPTIONS" or not unitID then
-    return false
+function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duration, expirationTime)
+  local allStates, state = aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithUnitID(
+    allStates,
+    event,
+    unitName,
+    duration
+  )
+
+  if not state then
+    return allStates
   end
 
-  duration = duration or 0
-
-  local state = allStates[unitID] or { autoHide = true, progressType = "timed" }
-
-  state.show = duration > 0
-  state.unit = unitID
-  state.changed = true
-  state.duration = duration
   state.expirationTime = expirationTime
-  state.index = GetTime()
 
-  allStates[unitID] = state
-
-  return true
+  return allStates
 end

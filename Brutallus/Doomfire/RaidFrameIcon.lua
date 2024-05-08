@@ -1,44 +1,52 @@
 function Init()
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
+
   aura_env.TRACKED_SPELL_NAME = "Doomfire"
+
+  function aura_env:UpdateTriggerUnitState(allStates, name, duration, isReset)
+    if not UnitExists(name) then
+      return
+    end
+
+    local unitID = aura_env.CONTEXT.roster[name]
+
+    if not unitID then
+      return
+    end
+
+    duration = duration or 0
+
+    local state = allStates[unitID] or { autoHide = true, progressType = "timed" }
+    allStates[unitID] = state
+
+    local now = GetTime()
+    local expirationTime = now
+
+    if not isReset then
+      expirationTime = now + duration
+    end
+
+    state.unit = unitID
+    state.changed = true
+    state.show = duration > 0
+    state.duration = duration
+    state.expirationTime = expirationTime
+    state.index = now
+  end
 end
 
 -- SOLTI_DOOMFIRE_RAID_FRAME_ICONS_TRIGGER
-function Trigger1(allStates, event, firstUnitID, secondUnitID, duration)
-  if event == "OPTIONS" or (not UnitExists(firstUnitID) and not UnitExists(secondUnitID)) then
+function Trigger1(allStates, event, firstUnitName, secondUnitName, duration)
+  if event == "OPTIONS" then
     return false
   end
 
-  duration = duration or 0
+  aura_env:UpdateTriggerUnitState(allStates, firstUnitName, duration)
+  aura_env:UpdateTriggerUnitState(allStates, secondUnitName, duration)
 
-  if UnitExists(firstUnitID) then
-    local now = GetTime()
-    local state = allStates[firstUnitID] or { autoHide = true, progressType = "timed" }
-
-    state.unit = firstUnitID
-    state.changed = true
-    state.show = duration > 0
-    state.duration = duration
-    state.expirationTime = GetTime() + duration
-    state.index = now
-
-    allStates[firstUnitID] = state
-  end
-
-  if UnitExists(secondUnitID) then
-    local now = GetTime()
-    local state = allStates[secondUnitID] or { autoHide = true, progressType = "timed" }
-
-    state.unit = secondUnitID
-    state.changed = true
-    state.show = duration > 0
-    state.duration = duration
-    state.expirationTime = GetTime() + duration
-    state.index = now
-
-    allStates[secondUnitID] = state
-  end
-
-  return true
+  return allStates
 end
 
 --CLEU:SPELL_AURA_REMOVED,CLEU:UNIT_DIED
@@ -62,22 +70,7 @@ function Trigger2(
     return false
   end
 
+  aura_env:UpdateTriggerUnitState(allStates, destName, 0, true)
 
-  if not UnitExists(destName) then
-    return false
-  end
-
-  local now = GetTime()
-  local state = allStates[destName] or { autoHide = true, progressType = "timed" }
-
-  state.unit = destName
-  state.changed = true
-  state.show = false
-  state.duration = 0
-  state.expirationTime = now
-  state.index = now
-
-  allStates[destName] = state
-
-  return false
+  return allStates
 end

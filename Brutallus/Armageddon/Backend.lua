@@ -1,9 +1,12 @@
 function Init()
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
+
   aura_env.TRACKED_SPELL_ID = 20478
   --aura_env.TRACKED_SPELL_ID = 25222 -- Renew test
   aura_env.DURATION = 10
   aura_env.TRIGGER_EVENT = "SOLTI_ARMAGEDDON_TRIGGER"
-  aura_env.SELF_NAME = UnitName("player")
 end
 
 -- CLEU:SPELL_AURA_APPLIED
@@ -26,7 +29,7 @@ function Trigger1(
     return false
   end
 
-  local isSelfTarget = destName == aura_env.SELF_NAME
+  local isSelfTarget = aura_env.CONTEXT:IsMyName(destName)
   local isTargetClose = WeakAuras.CheckRange(destName, 15, "<=")
 
   if isSelfTarget then

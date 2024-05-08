@@ -17,34 +17,20 @@ function Trigger1(allStates, event, prefix, text)
 
   local unitID = aura_env.CONTEXT.roster[unitName]
 
-  if not unitID or not UnitExists(unitID) then
+  if not UnitExists(unitID) then
     return false
   end
 
   local state = allStates[unitID] or { progressType = "static" }
 
   state.unit = unitID
+  state.stacks = stacks
   state.show = isDebuffed == 'true'
   state.isSafe = isSafe == 'true'
   state.changed = true
-  state.stacks = tonumber(stacks or 0)
-  state.stacksText = stacks or ""
   state.index = GetTime()
 
   allStates[unitID] = state
 
   return allStates
-end
-
-local trigger1CustomVariables =
-{ stacks = "number", stacksText = "string" }
-
--- SOLTI_GAS_NOVA_DURATION_TRIGGER
-function Trigger2(allStates, event, unitName, duration)
-  return aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithUnitID(
-    allStates,
-    event,
-    unitName,
-    duration
-  )
 end

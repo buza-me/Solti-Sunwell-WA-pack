@@ -1,24 +1,15 @@
 function Init()
-  aura_env.CHAT_MSG_ADDON_PREFIX = "SOLTI_WA_GAS_NOVA"
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
 end
 
--- CHAT_MSG_ADDON
-function Trigger1(allStates, event, prefix, text)
-  if prefix ~= aura_env.CHAT_MSG_ADDON_PREFIX then
-    return allStates
-  end
-
-  local unitName, isDebuffed, isSafe, stacks = text:match("(%S+)%s+(%S+)%s+(%S+)%s+(%d+)")
-
-  local state = allStates[unitName] or { progressType = "static" }
-
-  state.unit = unitName
-  state.show = isDebuffed == 'true'
-  state.isSafe = isSafe == 'true'
-  state.changed = true
-  state.index = GetTime()
-
-  allStates[unitName] = state
-
-  return allStates
+-- SOLTI_GAS_NOVA_DURATION_TRIGGER
+function Trigger2(allStates, event, unitName, duration)
+  return aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithUnitID(
+    allStates,
+    event,
+    unitName,
+    duration
+  )
 end

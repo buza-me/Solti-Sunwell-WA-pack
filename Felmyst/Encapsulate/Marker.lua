@@ -3,14 +3,14 @@ function Init()
 end
 
 -- SOLTI_ENCAPSULATE_MARK_TRIGGER
-function Trigger1(event, unitID, duration)
-  if event == "OPTIONS" or not unitID then
+function Trigger1(event, unitName, duration)
+  if event == "OPTIONS" or not UnitExists(unitName) then
     return false
   end
 
   WeakAuras.ScanEvents(
     aura_env.MARK_TRIGGER_EVENT,
-    unitID,
+    unitName,
     aura_env.config.markID,
     duration
   )

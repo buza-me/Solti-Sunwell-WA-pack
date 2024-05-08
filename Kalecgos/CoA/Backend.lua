@@ -1,9 +1,12 @@
 function Init()
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
+
   aura_env.TRACKED_SPELL_ID = 45032
   --aura_env.TRACKED_SPELL_ID = 25222 --Renew
   aura_env.TRIGGER_EVENT = "SOLTI_COA_TRIGGER"
   aura_env.DURATION = 30
-  aura_env.SELF_NAME = UnitName("player")
 end
 
 -- CLEU:SPELL_AURA_APPLIED
@@ -29,7 +32,8 @@ function Trigger1(
   WeakAuras.ScanEvents(
     aura_env.TRIGGER_EVENT,
     destName,
-    aura_env.DURATION
+    aura_env.DURATION,
+    aura_env.CONTEXT:IsMyName(destName)
   )
 
   return false
@@ -58,7 +62,8 @@ function Trigger2(
   WeakAuras.ScanEvents(
     aura_env.TRIGGER_EVENT,
     destName,
-    0
+    0,
+    aura_env.CONTEXT:IsMyName(destName)
   )
 
   return false

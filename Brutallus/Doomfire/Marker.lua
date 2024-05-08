@@ -1,29 +1,19 @@
 function Init()
-  aura_env.TRACKED_SPELL_NAME = "Doomfire"
-  local SELF_NAME = UnitName("player")
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
 
-  function aura_env:CanSelfMark()
-    for i = 1, GetNumRaidMembers() do
-      local name, rank = GetRaidRosterInfo(i)
-      if name == SELF_NAME then
-        return rank == 2 -- raid lead
-      end
-    end
-  end
+  aura_env.TRACKED_SPELL_NAME = "Doomfire"
 end
 
 -- SOLTI_DOOMFIRE_MARK_TRIGGER
-function Trigger1(event, firstUnitID, secondUnitID)
-  if event == "OPTIONS" or not firstUnitID or not secondUnitID then
+function Trigger1(event, firstUnitName, secondUnitName)
+  if event == "OPTIONS" or not UnitExists(firstUnitName) or not UnitExists(secondUnitName) then
     return false
   end
 
-  if not aura_env:CanSelfMark() then
-    return false
-  end
-
-  SetRaidTarget(firstUnitID, aura_env.config.firstMarkID)
-  SetRaidTarget(secondUnitID, aura_env.config.secondMarkID)
+  aura_env.CONTEXT:SetRaidMark(firstUnitName, aura_env.config.firstMarkID)
+  aura_env.CONTEXT:SetRaidMark(secondUnitName, aura_env.config.secondMarkID)
 
   return false
 end
@@ -48,21 +38,12 @@ function Trigger2(
     return false
   end
 
-  if not aura_env:CanSelfMark() then
-    return false
-  end
-
   if not UnitExists(destName) then
     return false
   end
 
-  local raidTargetIndex = GetRaidTargetIndex(destName)
-
-  if raidTargetIndex ~= aura_env.config.firstMarkID and raidTargetIndex ~= aura_env.config.secondMarkID then
-    return false
-  end
-
-  SetRaidTarget(destName, 0)
+  aura_env.CONTEXT:UnsetRaidMark(destName, aura_env.config.firstMarkID)
+  aura_env.CONTEXT:UnsetRaidMark(destName, aura_env.config.secondMarkID)
 
   return false
 end

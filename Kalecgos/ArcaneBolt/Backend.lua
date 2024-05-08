@@ -1,54 +1,28 @@
 function Init()
-  local BOSS_NAME = "Kalecgos"
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
+
+  aura_env.BOSS_NAME = "Kalecgos"
   aura_env.TRACKED_SPELL_ID = 41483
-  --local BOSS_NAME = "Solti"
+  --aura_env.BOSS_NAME = "Solti"
   --aura_env.TRACKED_SPELL_ID = 25213
   aura_env.BOSS_TARGET_SWAP_DELAY = 0.5
   local PROJECTILE_TRAVEL_TIME = 1.5
-  aura_env.SELF_NAME = UnitName("player")
   local TRACKED_SPELL_NAME, _, _, _, _, _, TRACKED_SPELL_CASTING_TIME, _, _ = GetSpellInfo(aura_env.TRACKED_SPELL_ID)
   aura_env.TRACKED_SPELL_NAME = TRACKED_SPELL_NAME
   aura_env.DURATION = (TRACKED_SPELL_CASTING_TIME / 1000) + PROJECTILE_TRAVEL_TIME
   aura_env.TRIGGER_EVENT = "SOLTI_ARCANE_BOLT_TRIGGER"
+  aura_env.lastTriggerExecutionTime = GetTime()
   aura_env.trackedSpellCastStartTime = nil
-  aura_env.initialBossTargetUnitName = nil
-  aura_env.lastTriggerExecutionTime = nil
+  aura_env.initialBossTargetName = nil
 
-  function aura_env:GetBossTarget()
-    local numberOfRaidMembers = GetNumRaidMembers()
-
-    for i = 1, numberOfRaidMembers do
-      local raidUnitID = "raid" .. i
-
-      if UnitName(raidUnitID) == aura_env.SELF_NAME then
-        raidUnitID = "player"
-      end
-
-      local raidUnitTargetName = UnitName(raidUnitID .. "target")
-
-      if raidUnitTargetName == BOSS_NAME then
-        for j = 1, numberOfRaidMembers do
-          local name = GetRaidRosterInfo(j)
-          if name == UnitName(raidUnitID .. "targettarget") then
-            return "raid" .. j, name
-          end
-        end
-
-        return nil, nil
-      end
-    end
-  end
-
-  function aura_env:IsTooClose(unitID)
-    return CheckInteractDistance(unitID, 3) == 1
-  end
-
-  function aura_env:IsSelfUnitID(unitID)
-    return UnitName(unitID) == aura_env.SELF_NAME
+  function aura_env:IsTooClose(unitName)
+    return CheckInteractDistance(unitName, 3) == 1
   end
 
   function aura_env:Reset()
-    aura_env.initialBossTargetUnitName = nil
+    aura_env.initialBossTargetName = nil
     aura_env.trackedSpellCastStartTime = nil
   end
 end
@@ -73,8 +47,8 @@ function Trigger1(
     return false
   end
 
-  local _, bossTargetUnitName = aura_env:GetBossTarget()
-  aura_env.initialBossTargetUnitName = bossTargetUnitName
+  local _, bossTargetName = aura_env.Config:GetUnitTargetAndGUID(aura_env.BOSS_NAME)
+  aura_env.initialBossTargetName = bossTargetName
   aura_env.trackedSpellCastStartTime = GetTime()
 
   return false
@@ -82,38 +56,39 @@ end
 
 -- every frame
 function Trigger2()
+  local now = GetTime()
+
   local shouldAbort =
-      not aura_env.trackedSpellCastStartTime or
-      (aura_env.lastTriggerExecutionTime and
-        (GetTime() - aura_env.lastTriggerExecutionTime < aura_env.config.throttleThreshold))
+      not aura_env.trackedSpellCastStartTime
+      or now - aura_env.lastTriggerExecutionTime < aura_env.config.throttleThreshold
 
   if shouldAbort then
     return false
   else
-    aura_env.lastTriggerExecutionTime = GetTime()
+    aura_env.lastTriggerExecutionTime = now
   end
 
-  local bossTargetUnitID, bossTargetUnitName = aura_env:GetBossTarget()
-  local isNotTargetSwap = bossTargetUnitName == aura_env.initialBossTargetUnitName
-  local isNotTimeForTargetSwap = GetTime() < aura_env.trackedSpellCastStartTime + aura_env.BOSS_TARGET_SWAP_DELAY
+  local bossTargetName = aura_env.Config:GetUnitTargetAndGUID(aura_env.BOSS_NAME)
+  local isNotTargetSwap = bossTargetName == aura_env.initialBossTargetName
+  local isNotTimeForTargetSwap = now < aura_env.trackedSpellCastStartTime + aura_env.BOSS_TARGET_SWAP_DELAY
 
   -- Boss targets the real target around half a second after he starts casting
   if isNotTargetSwap and isNotTimeForTargetSwap then
     return false
   end
 
-  if not bossTargetUnitName then
+  if not bossTargetName then
     aura_env:Reset()
     return false
   end
 
   local isSelfTooCloseToBossTarget = false
-  local isSelfBossTarget = aura_env:IsSelfUnitID(bossTargetUnitID)
+  local isSelfBossTarget = aura_env.CONTEXT:IsMyName(bossTargetName)
 
   if isSelfBossTarget then
     SendChatMessage(aura_env.config.chatMessage, "SAY")
   else
-    isSelfTooCloseToBossTarget = aura_env:IsTooClose(bossTargetUnitID)
+    isSelfTooCloseToBossTarget = aura_env:IsTooClose(bossTargetName)
   end
 
   if not isSelfBossTarget and not isSelfTooCloseToBossTarget then
@@ -123,7 +98,7 @@ function Trigger2()
 
   WeakAuras.ScanEvents(
     aura_env.TRIGGER_EVENT,
-    bossTargetUnitID,
+    bossTargetName,
     isSelfBossTarget,
     isSelfTooCloseToBossTarget,
     aura_env.DURATION

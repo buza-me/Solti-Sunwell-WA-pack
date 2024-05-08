@@ -1,27 +1,19 @@
 function Init()
-  aura_env.SELF_NAME = UnitName("player")
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
 end
 
 -- SOLTI_COA_TRIGGER
-function Trigger1(allStates, event, unitID, duration)
-  if event == "OPTIONS" or unitID ~= aura_env.SELF_NAME then
-    return false
-  end
-
-  duration = duration or 0
-
-  local state = allStates[""] or { autoHide = true, progressType = "timed" }
-
-  state.changed = true
-  state.show = duration > 0
-  state.duration = duration
-  state.expirationTime = GetTime() + duration
-
-  allStates[""] = state
-
-  return true
+function Trigger1(allStates, event, unitName, duration, isTargetSelf)
+  return aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithSelfTargetCheck(
+    allStates,
+    event,
+    unitName,
+    duration,
+    isTargetSelf
+  )
 end
 
-function Trigger1CustomVariables()
-  return { duration = "number", expirationTime = "number" }
-end
+local trigger1CustomVariables =
+{ duration = "number", expirationTime = "number" }

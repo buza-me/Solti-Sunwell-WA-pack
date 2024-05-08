@@ -1,4 +1,7 @@
 function Init()
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
   aura_env.THREAT_ADDON = LibStub("Threat-2.0")
   aura_env.BOSS_NAME = "Felmyst"
   aura_env.AIR_PHASE_DURATION = 99
@@ -21,57 +24,16 @@ function Init()
   aura_env.AIR_PHASE_EMOTE = "I am stronger than ever before!"
   aura_env.ENCAPSULATE_TRIGGER_EVENT = "SOLTI_ENCAPSULATE_TRIGGER"
   aura_env.ENCAPSULATE_MARK_TRIGGER_EVENT = "SOLTI_ENCAPSULATE_MARK_TRIGGER"
-  aura_env.SELF_NAME = UnitName("player")
   aura_env.airPhaseEndTime = GetTime()
   aura_env.lastTriggerExecutionTime = GetTime()
   aura_env.lastGasNovaCastTime = GetTime()
   aura_env.lastEncapsulateTargetSwapTime = GetTime()
   aura_env.firstGasNovaCastTime = nil
   aura_env.shouldCheckBossTargetSwap = false
-  aura_env.currentBossTargetUnitName = nil
-  aura_env.currentBossTargetUnitID = nil
+  aura_env.currentBossTargetName = nil
   aura_env.encapsulateEndTime = nil
   aura_env.encapsulateDuration = nil
-  aura_env.encapsulatedUnitID = nil
   aura_env.encapsulatedUnitName = nil
-
-  function aura_env:GetBossTargetAndGUID()
-    local numberOfRaidMembers = GetNumRaidMembers()
-
-    for i = 1, numberOfRaidMembers do
-      local raidUnitID = "raid" .. i
-
-      if UnitName(raidUnitID) == aura_env.SELF_NAME then
-        raidUnitID = "player"
-      end
-
-      local raidUnitTargetName = UnitName(raidUnitID .. "target")
-
-      if raidUnitTargetName == aura_env.BOSS_NAME then
-        local bossGUID = UnitGUID(raidUnitID .. "target")
-
-        for j = 1, numberOfRaidMembers do
-          local name = GetRaidRosterInfo(j)
-          if name == UnitName(raidUnitID .. "targettarget") then
-            return "raid" .. j, name, bossGUID
-          end
-        end
-
-        return nil, nil
-      end
-    end
-  end
-
-  function aura_env:GetRaidUnitID(playerName)
-    for i = 1, GetNumRaidMembers() do
-      local raidUnitID = "raid" .. i
-
-      if UnitName(raidUnitID) == playerName then
-        return raidUnitID
-      end
-    end
-    return nil
-  end
 
   function aura_env:IsUnitTankingTheBoss(unitGUID, bossGUID)
     local maxThreat, tankingUnitGUID = aura_env.THREAT_ADDON:GetMaxThreatOnTarget(bossGUID)
@@ -83,12 +45,16 @@ function Init()
     return unitGUID == tankingUnitGUID
   end
 
-  function aura_env:HasEncapsulateDebuff(unitID)
+  function aura_env:HasEncapsulateDebuff(unitName)
+    if not UnitExists(unitName) then
+      return false
+    end
+
     local hasEncapsDebuff = false
     local debuffIndex = 1
 
     while true do
-      local debuffName = UnitDebuff(unitID, debuffIndex)
+      local debuffName = UnitDebuff(unitName, debuffIndex)
 
       if not debuffName then
         break
@@ -106,20 +72,16 @@ function Init()
   end
 
   function aura_env:IsSelfEncapsulated()
-    return aura_env.encapsulatedUnitName == aura_env.SELF_NAME
-  end
-
-  function aura_env:NotifyResetTriggers()
-
+    return aura_env.CONTEXT:IsMyName(aura_env.encapsulatedUnitName)
   end
 
   function aura_env:NotifyUpdateSubscribers()
-    local isSelfClose = WeakAuras.CheckRange(aura_env.encapsulatedUnitID, 25, "<=")
+    local isSelfClose = WeakAuras.CheckRange(aura_env.encapsulatedUnitName, 25, "<=")
     local isSelfTarget = aura_env:IsSelfEncapsulated()
 
     WeakAuras.ScanEvents(
       aura_env.ENCAPSULATE_TRIGGER_EVENT,
-      aura_env.encapsulatedUnitID,
+      aura_env.encapsulatedUnitName,
       isSelfTarget,
       isSelfClose,
       aura_env.encapsulateDuration,
@@ -130,24 +92,18 @@ function Init()
   function aura_env:MarkEncapsulateTarget()
     WeakAuras.ScanEvents(
       aura_env.ENCAPSULATE_MARK_TRIGGER_EVENT,
-      aura_env.encapsulatedUnitID,
+      aura_env.encapsulatedUnitName,
       aura_env.encapsulateDuration
     )
   end
 
-  function aura_env:SendChatMessage()
-    SendChatMessage(aura_env.config.chatMessage, "SAY")
-  end
-
   function aura_env:RegisterEncapsulate(
       duration,
-      unitID,
       unitName,
       isDebuffTrigger
   )
     aura_env.encapsulateDuration = duration
     aura_env.encapsulateEndTime = GetTime() + duration
-    aura_env.encapsulatedUnitID = unitID
     aura_env.encapsulatedUnitName = unitName
 
     if isDebuffTrigger then
@@ -155,7 +111,7 @@ function Init()
     end
 
     if aura_env:IsSelfEncapsulated() then
-      aura_env:SendChatMessage()
+      SendChatMessage(aura_env.config.chatMessage, "SAY")
     end
 
     aura_env:MarkEncapsulateTarget()
@@ -165,7 +121,6 @@ function Init()
   function aura_env:ResetEncapsulate()
     aura_env.encapsulateEndTime = nil
     aura_env.encapsulateDuration = nil
-    aura_env.encapsulatedUnitID = nil
     aura_env.encapsulatedUnitName = nil
     aura_env:NotifyUpdateSubscribers()
   end
@@ -194,8 +149,8 @@ function Trigger1()
     aura_env:ResetEncapsulate()
   end
 
-  if aura_env.encapsulatedUnitID then
-    local hasEncapsDebuff = aura_env:HasEncapsulateDebuff(aura_env.encapsulatedUnitID)
+  if aura_env.encapsulatedUnitName then
+    local hasEncapsDebuff = aura_env:HasEncapsulateDebuff(aura_env.encapsulatedUnitName)
     local isProbablyCasting = now - aura_env.lastEncapsulateTargetSwapTime < aura_env.ENCAPSULATE_CAST_DURATION
 
     if not hasEncapsDebuff and not isProbablyCasting then
@@ -212,15 +167,13 @@ function Trigger1()
     return false
   end
 
-  for raidIndex = 1, GetNumRaidMembers() do
-    local unitID = "raid" .. raidIndex
+  for unitID in WA_IterateGroupMembers() do
     local unitName = UnitName(unitID)
-    local hasEncapsDebuff = aura_env:HasEncapsulateDebuff(unitID)
+    local hasEncapsDebuff = aura_env:HasEncapsulateDebuff(unitName)
 
     if hasEncapsDebuff then
       aura_env:RegisterEncapsulate(
         aura_env.ENCAPSULATE_DEBUFF_DURATION,
-        unitID,
         unitName,
         true
       )
@@ -237,39 +190,34 @@ function Trigger1()
   -- Code below looks for boss target swap and registers encapsulate cast if the new boss target is not top on threat.
 
   if not aura_env.shouldCheckBossTargetSwap or not aura_env.THREAT_ADDON then
-    if aura_env.currentBossTargetUnitID or aura_env.currentBossTargetUnitName then
-      aura_env.currentBossTargetUnitID = nil
-      aura_env.currentBossTargetUnitName = nil
+    if aura_env.currentBossTargetName then
+      aura_env.currentBossTargetName = nil
     end
     return false
   end
 
-  local bossTargetUnitID, bossTargetUnitName, bossGUID = aura_env:GetBossTargetAndGUID()
-
-  local previousBossTargetUnitID = aura_env.currentBossTargetUnitID
-  local previousBossTargetUnitName = aura_env.currentBossTargetUnitName
-
-  aura_env.currentBossTargetUnitID = bossTargetUnitID
-  aura_env.currentBossTargetUnitName = bossTargetUnitName
+  local bossTargetName, bossGUID = aura_env.CONTEXT:GetUnitTargetAndGUID(aura_env.BOSS_NAME)
+  local previousBossTargetName = aura_env.currentBossTargetName
+  aura_env.currentBossTargetName = bossTargetName
 
   local hasEnoughTargetRecords =
-      previousBossTargetUnitName and aura_env.currentBossTargetUnitName
+      previousBossTargetName and aura_env.currentBossTargetName
 
   local isSameTarget =
-      previousBossTargetUnitName == aura_env.currentBossTargetUnitName
+      previousBossTargetName == aura_env.currentBossTargetName
 
   local shouldAbortTargetSwapCheck =
       isSameTarget
       or not hasEnoughTargetRecords
       or not bossGUID
-      or UnitIsDeadOrGhost(previousBossTargetUnitID) == 1
+      or UnitIsDeadOrGhost(previousBossTargetName) == 1
 
   if shouldAbortTargetSwapCheck then
     return false
   end
 
   local isTargetTank = aura_env:IsUnitTankingTheBoss(
-    UnitGUID(bossTargetUnitID),
+    UnitGUID(bossTargetName),
     bossGUID
   )
 
@@ -279,8 +227,7 @@ function Trigger1()
 
   aura_env:RegisterEncapsulate(
     aura_env.ENCAPSULATE_TOTAL_DURATION,
-    aura_env.currentBossTargetUnitID,
-    aura_env.currentBossTargetUnitName,
+    aura_env.currentBossTargetName,
     false
   )
 

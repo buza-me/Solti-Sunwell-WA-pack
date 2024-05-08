@@ -1,5 +1,9 @@
 -- load only in combat
 function Init()
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
+
   aura_env.DRAGON_NAME = "Kalecgos"
   aura_env.DEMON_NAME = "Sathrovarr the Corruptor"
   -- aura_env.DRAGON_NAME = "Solti"
@@ -7,7 +11,6 @@ function Init()
   aura_env.CHAT_MSG_ADDON_PREFIX = "SOLTI_WA_KALECGOS_HEALTH"
   aura_env.DRAGON_BAR_UPDATE_EVENT = "SOLTI_WA_KALECGOS_HEALTH__DRAGON_BAR_UPDATE"
   aura_env.DEMON_BAR_UPDATE_EVENT = "SOLTI_WA_KALECGOS_HEALTH__DEMON_BAR_UPDATE"
-  aura_env.SELF_NAME = UnitName("player")
   aura_env.SCAN_FREQUENCY_SEC = 1
   aura_env.lastScanTime = GetTime()
   aura_env.lastSyncTime = GetTime()
@@ -60,48 +63,41 @@ function Trigger2()
     aura_env.lastScanTime = now
   end
 
-  local numberOfRaidMembers = GetNumRaidMembers()
   local firstPlayerWithDragonTarget = nil
   local firstPlayerWithDemonTarget = nil
-  local raidUnitNames = {}
-  local raidUnitIDsByNames = {}
-  local playersWithWALib = LibStub("PlayersWithSoltiSunwellWA")
-  local playersWithWA = playersWithWALib.names or {}
 
-  playersWithWA[aura_env.SELF_NAME] = true
+  local playersWithSunwellPack = aura_env.CONTEXT.playersWithSunwellPack
 
-  for i = 1, numberOfRaidMembers do
-    local unitID = "raid" .. i
-    local unitName = UnitName(unitID)
-    raidUnitIDsByNames[unitName] = unitID
-    table.insert(raidUnitNames, unitName)
+  playersWithSunwellPack[aura_env.CONTEXT.SELF_NAME] = true
+
+  local sortedPlayersWithSunwellPack = {}
+
+  for unitName, _ in pairs(playersWithSunwellPack) do
+    table.insert(sortedPlayersWithSunwellPack, unitName)
   end
 
-  table.sort(raidUnitNames, aura_env.CompareStrings)
+  table.sort(sortedPlayersWithSunwellPack, aura_env.CompareStrings)
 
-  for i = 1, #raidUnitNames do
-    local raidUnitName = raidUnitNames[i]
+  for i = 1, #sortedPlayersWithSunwellPack do
+    local raidUnitName = sortedPlayersWithSunwellPack[i]
+    local raidUnitID = aura_env.CONTEXT.roster[raidUnitName]
 
-    if playersWithWA[raidUnitName] then
-      local raidUnitID = raidUnitIDsByNames[raidUnitName]
+    local raidUnitTargetID = raidUnitID .. "target"
+    local raidUnitTargetName = UnitName(raidUnitTargetID)
 
-      local targetID = raidUnitID .. "target"
-      local targetName = UnitName(targetID)
+    local isTargetDragon = raidUnitTargetName == aura_env.DRAGON_NAME
+    local isTargetDemon = raidUnitTargetName == aura_env.DEMON_NAME
 
-      local isTargetDragon = targetName == aura_env.DRAGON_NAME
-      local isTargetDemon = targetName == aura_env.DEMON_NAME
+    if isTargetDragon and not firstPlayerWithDragonTarget then
+      firstPlayerWithDragonTarget = raidUnitName
+    end
 
-      if isTargetDragon and not firstPlayerWithDragonTarget then
-        firstPlayerWithDragonTarget = raidUnitName
-      end
-
-      if isTargetDemon and not firstPlayerWithDemonTarget then
-        firstPlayerWithDemonTarget = raidUnitName
-      end
+    if isTargetDemon and not firstPlayerWithDemonTarget then
+      firstPlayerWithDemonTarget = raidUnitName
     end
   end
 
-  if firstPlayerWithDragonTarget == aura_env.SELF_NAME then
+  if aura_env.CONTEXT:IsMyName(firstPlayerWithDragonTarget) then
     aura_env:Notify(
       aura_env.DRAGON_BAR_UPDATE_EVENT,
       UnitHealth("target"),
@@ -109,7 +105,7 @@ function Trigger2()
     )
   end
 
-  if firstPlayerWithDemonTarget == aura_env.SELF_NAME then
+  if aura_env.CONTEXT:IsMyName(firstPlayerWithDemonTarget) then
     aura_env:Notify(
       aura_env.DEMON_BAR_UPDATE_EVENT,
       UnitHealth("target"),

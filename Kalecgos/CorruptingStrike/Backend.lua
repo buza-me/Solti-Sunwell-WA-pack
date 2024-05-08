@@ -1,4 +1,8 @@
 function Init()
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
+
   aura_env.TRACKED_SPELL_ID = 45029
   --aura_env.TRACKED_SPELL_ID = 25222 --Renew
   aura_env.TRIGGER_EVENT = "SOLTI_CORRUPTING_STRIKE_TRIGGER"
@@ -26,14 +30,17 @@ function Trigger1(
     return false
   end
 
-  if destName == aura_env.SELF_NAME then
+  local isTargetSelf = aura_env.CONTEXT:IsMyName(destName)
+
+  if isTargetSelf then
     SendChatMessage(aura_env.config.chatMessage, "SAY")
   end
 
   WeakAuras.ScanEvents(
     aura_env.TRIGGER_EVENT,
     destName,
-    aura_env.DURATION
+    aura_env.DURATION,
+    isTargetSelf
   )
 
   return false
@@ -62,7 +69,8 @@ function Trigger2(
   WeakAuras.ScanEvents(
     aura_env.TRIGGER_EVENT,
     destName,
-    0
+    0,
+    aura_env.CONTEXT:IsMyName(destName)
   )
 
   return false

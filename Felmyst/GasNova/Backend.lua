@@ -1,9 +1,14 @@
 function Init()
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
+
   aura_env.TRACKED_SPELL_ID = 45855
   --aura_env.TRACKED_SPELL_ID = 25222
-  aura_env.SELF_NAME = UnitName("player")
+  aura_env.DURATION = 30
   aura_env.CHAT_MSG_ADDON_PREFIX = "SOLTI_WA_GAS_NOVA"
   aura_env.TRIGGER_EVENT = "SOLTI_GAS_NOVA_TRIGGER"
+  aura_env.DURATION_TRIGGER_EVENT = "SOLTI_GAS_NOVA_DURATION_TRIGGER"
   aura_env.isDebuffed = false
   aura_env.isBroadcasting = false
   aura_env.numberOfPlayersNear = 0
@@ -12,7 +17,13 @@ function Init()
   function aura_env:NotifyUpdateSubscribers(isDebuffed, isSafe, numPlayersNear)
     SendAddonMessage(
       aura_env.CHAT_MSG_ADDON_PREFIX,
-      aura_env.SELF_NAME .. " " .. tostring(isDebuffed) .. " " .. tostring(isSafe) .. " " .. tostring(numPlayersNear),
+      string.format(
+        "%s %s %s %d",
+        aura_env.CONTEXT.SELF_NAME,
+        tostring(isDebuffed),
+        tostring(isSafe),
+        numPlayersNear
+      ),
       "RAID"
     )
     WeakAuras.ScanEvents(
@@ -34,22 +45,23 @@ function Trigger1()
     aura_env.lastTriggerExecutionTime = GetTime();
   end
 
-  if not aura_env.isDebuffed and aura_env.isBroadcasting then
-    aura_env.isBroadcasting = false
-    aura_env.numberOfPlayersNear = 0
-    aura_env:NotifyUpdateSubscribers(false, true, 0)
-    return false
-  elseif not aura_env.isDebuffed then
+  if not aura_env.isDebuffed then
+    if aura_env.isBroadcasting then
+      aura_env.isBroadcasting = false
+      aura_env.numberOfPlayersNear = 0
+      aura_env:NotifyUpdateSubscribers(false, true, 0)
+    end
+
     return false
   end
 
 
   local numberOfPlayersNear = 0
 
-  for i = 1, GetNumRaidMembers() do
-    local raidUnitID = "raid" .. i
-
-    if UnitName(raidUnitID) ~= aura_env.SELF_NAME and WeakAuras.CheckRange(raidUnitID, 15, "<=") then
+  for unitID in WA_IterateGroupMembers() do
+    local isUnitSelf = unitID == aura_env.CONTEXT.roster[aura_env.CONTEXT.SELF_NAME]
+    local isUnitNear = not isUnitSelf and WeakAuras.CheckRange(unitID, 15, "<=")
+    if isUnitNear then
       numberOfPlayersNear = numberOfPlayersNear + 1
     end
   end
@@ -89,7 +101,19 @@ function Trigger2(
     return false
   end
 
-  if destName ~= aura_env.SELF_NAME then
+  local duration = 0
+
+  if subEvent == "SPELL_AURA_APPLIED" then
+    duration = aura_env.DURATION
+  end
+
+  WeakAuras.ScanEvents(
+    aura_env.DURATION_TRIGGER_EVENT,
+    destName,
+    duration
+  )
+
+  if not aura_env.CONTEXT:IsMyName(destName) then
     return
   end
 

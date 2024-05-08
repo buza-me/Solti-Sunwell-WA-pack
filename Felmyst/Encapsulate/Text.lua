@@ -1,5 +1,5 @@
 -- SOLTI_ENCAPSULATE_TRIGGER
-function Trigger1(allStates, event, unitID, isSelfTarget, isSelfClose, duration, expirationTime)
+function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duration, expirationTime)
   if event == "OPTIONS" then
     return false
   end
@@ -31,6 +31,5 @@ function Trigger1(allStates, event, unitID, isSelfTarget, isSelfClose, duration,
   return true
 end
 
-function Trigger1CustomVariables()
-  return { isSelfTarget = "bool", isSelfClose = "bool" }
-end
+local trigger1CustomVariables =
+{ isSelfTarget = "bool", isSelfClose = "bool" }

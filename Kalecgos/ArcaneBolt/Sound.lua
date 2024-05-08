@@ -1,5 +1,5 @@
 -- SOLTI_ARCANE_BOLT_TRIGGER
-function Trigger1(allStates, event, unitID, isSelfTarget, isSelfClose, duration)
+function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duration)
   if event == "OPTIONS" or (not isSelfTarget and not isSelfClose) then
     return false
   end
@@ -20,6 +20,5 @@ function Trigger1(allStates, event, unitID, isSelfTarget, isSelfClose, duration)
   return true
 end
 
-function Trigger1CustomVariables()
-  return { isSelfTarget = "bool", isSelfClose = "bool" }
-end
+local trigger1CustomVariables =
+{ isSelfTarget = "bool", isSelfClose = "bool" }

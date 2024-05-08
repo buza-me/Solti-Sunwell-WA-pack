@@ -1,21 +1,10 @@
+function Init()
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
+end
+
 -- SOLTI_ARCANE_BOLT_TRIGGER
-function Trigger1(allStates, event, unitID, isSelfTarget, isSelfClose, duration)
-  if event == "OPTIONS" or not unitID then
-    return false
-  end
-
-  duration = duration or 0
-
-  local state = allStates[unitID] or { autoHide = true, progressType = "timed" }
-
-  state.show = true
-  state.unit = unitID
-  state.changed = true
-  state.duration = duration
-  state.expirationTime = GetTime() + duration
-  state.index = GetTime()
-
-  allStates[unitID] = state
-
-  return true
+function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duration)
+  return aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithUnitID(allStates, event, unitName, duration)
 end

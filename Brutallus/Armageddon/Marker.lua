@@ -3,14 +3,14 @@ function Init()
 end
 
 -- SOLTI_ARMAGEDDON_TRIGGER
-function Trigger1(event, event, unitID, isSelfTarget, isSelfClose, duration)
-  if event == "OPTIONS" or not unitID then
+function Trigger1(event, event, unitName, isSelfTarget, isSelfClose, duration)
+  if event == "OPTIONS" or not UnitExists(unitName) then
     return false
   end
 
   WeakAuras.ScanEvents(
     aura_env.MARK_TRIGGER_EVENT,
-    unitID,
+    unitName,
     aura_env.config.markID,
     duration
   )

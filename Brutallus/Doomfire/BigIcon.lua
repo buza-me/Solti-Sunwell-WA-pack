@@ -19,6 +19,5 @@ function Trigger1(allStates, event, linkedUnitName, duration)
   return true
 end
 
-function Trigger1CustomVariables()
-  return { linkedUnitName = "string" }
-end
+local trigger1CustomVariables =
+{ linkedUnitName = "string" }

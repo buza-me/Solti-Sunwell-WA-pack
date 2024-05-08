@@ -15,9 +15,8 @@ function Trigger1(allStates, event, isDebuffed, isSafe)
   return true
 end
 
-function Trigger1CustomVariables()
-  return { isSafe = "bool" }
-end
+local trigger1CustomVariables =
+{ isSafe = "bool" }
 
 function CustomCodeCondition()
   DBM.AddSpecialWarning("", true, true)

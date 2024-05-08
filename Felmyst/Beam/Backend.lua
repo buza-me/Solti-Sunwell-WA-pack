@@ -1,44 +1,11 @@
 function Init()
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
+
   aura_env.TRACKED_SPELL_ID = 45392
-  aura_env.SELF_NAME = UnitName("player")
-
-  function aura_env:IsSelfRaidLead()
-    for i = 1, GetNumRaidMembers() do
-      local name, rank = GetRaidRosterInfo(i)
-      if name == aura_env.SELF_NAME then
-        return rank == 2 -- raid lead
-      end
-    end
-  end
-
-  local CLASS_COLORS = {
-    DRUID = "FF7C0A",
-    HUNTER = "AAD372",
-    MAGE = "3FC7EB",
-    PALADIN = "F48CBA",
-    PRIEST = "FFFFFF",
-    ROGUE = "FFF468",
-    SHAMAN = "0070DD",
-    WARLOCK = "8788EE",
-    WARRIOR = "C69B6D"
-  }
-
-  local paintedNamesCache = {}
-
-  function aura_env:PaintNameByClass(unitName)
-    if paintedNamesCache[unitName] then
-      return paintedNamesCache[unitName]
-    end
-
-    for i = 1, GetNumRaidMembers() do
-      local name, _, _, _, _, fileName = GetRaidRosterInfo(i)
-      if name == unitName then
-        local paintedName = "|cff" .. CLASS_COLORS[fileName] .. unitName .. "|r"
-        paintedNamesCache[unitName] = paintedName
-        return paintedName
-      end
-    end
-  end
+  aura_env.DURATION = 10
+  aura_env.TRIGGER_EVENT = "SOLTI_BEAM_TRIGGER"
 end
 
 -- CLEU:SPELL_SUMMON
@@ -61,17 +28,26 @@ function Trigger1(
     return false
   end
 
-  if destName == aura_env.SELF_NAME then
+  local isSourceSelf = aura_env.CONTEXT:IsMyName(destName)
+
+  if isSourceSelf then
     SendChatMessage(aura_env.config.chatMessage, "SAY")
   end
 
-  if aura_env:IsSelfRaidLead() then
+  if aura_env.CONTEXT:IsSelfRaidLead() then
     SendChatMessage(
       string.format(
         aura_env.config.raidWarningMessage,
-        aura_env:PaintNameByClass(destName)
+        aura_env.CONTEXT:GetClassColorName(destName)
       ),
       "RAID_WARNING"
+    )
+
+    WeakAuras.ScanEvents(
+      aura_env.TRIGGER_EVENT,
+      sourceName,
+      aura_env.DURATION,
+      isSourceSelf
     )
   end
 

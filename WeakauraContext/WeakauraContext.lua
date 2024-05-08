@@ -23,6 +23,10 @@ function Init()
     Context.roster,
     {}
   )
+  Context.pendingAugmentDBM = Context:UseFallback(
+    Context.pendingAugmentDBM,
+    {}
+  )
   Context._paintedNamesCache = Context:UseFallback(
     Context._paintedNamesCache,
     {}
@@ -43,6 +47,10 @@ function Init()
       self.roster[unitID] = unitName
       self.roster[unitName] = unitID
     end
+  end
+
+  function Context:IsMyName(name)
+    return name == Context.SELF_NAME
   end
 
   function Context:IsHeroic()
@@ -74,14 +82,22 @@ function Init()
     return IsRaidOfficer() == 1
   end
 
-  function Context:GetRaidUnitIDFromName(name)
-    for i = 1, GetNumRaidMembers() do
-      local raidUnitID = "raid" .. i
+  function aura_env:GetUnitTargetAndGUID(unitName)
+    local unitTargetName = nil
+    local unitGUID = nil
 
-      if UnitName(raidUnitID) == name then
-        return raidUnitID
+    for groupUnitID in WA_IterateGroupMembers() do
+      local groupUnitTargetID = groupUnitID .. "target"
+      local groupUnitTargetName = UnitName(groupUnitTargetID)
+
+      if groupUnitTargetName == unitName then
+        unitTargetName = UnitName(groupUnitTargetID .. "target")
+        unitGUID = UnitGUID(groupUnitTargetID)
+        break
       end
     end
+
+    return unitTargetName, unitGUID
   end
 
   function Context:GetClassColorName(unitName)
@@ -187,44 +203,87 @@ function Init()
     return self:RemoveTimerInstance(self._intervals, id)
   end
 
-  function Context:AugmentDBM(modName, augmentFunction, ...)
-    local state = {
-      arguments = { ... },
-      startTime = GetTime(),
-      intervalID = nil,
-    }
+  function Context:AugmentDBM(modName, augmentFunction)
+    if not DBM then
+      return
+    end
 
-    local intervalID = Context:SetInterval(
-      function()
-        if GetTime() - state.startTime >= 20 then
-          Context:ClearInterval(state.intervalID)
-        end
+    local mod = DBM:GetMod(modName)
 
-        if not DBM then
-          return
-        end
+    if not mod then
+      return
+    end
 
-        local mod = DBM:GetMod(modName)
+    if mod.isAugmentedBySolti then
+      self.pendingAugmentDBM[modName] = nil
+      return
+    else
+      mod.isAugmentedBySolti = true
+    end
 
-        if not mod then
-          return
-        end
+    self.pendingAugmentDBM[modName] = nil
 
-        if mod.isAugmentedBySolti then
-          Context:ClearInterval(state.intervalID)
-          return
-        else
-          mod.isAugmentedBySolti = true
-        end
+    augmentFunction(mod)
+  end
 
-        augmentFunction(mod, unpack(state.arguments))
+  function Context:GenericTimedTriggerStateUpdaterLogicWithUnitID(allStates, event, unitName, duration)
+    if event == "OPTIONS" or not UnitExists(unitName) then
+      return allStates, nil
+    end
 
-        Context:ClearInterval(state.intervalID)
-      end,
-      0
-    )
+    local unitID = aura_env.CONTEXT.roster[unitName]
 
-    state.intervalID = intervalID
+    if not unitID then
+      return allStates, nil
+    end
+
+    duration = duration or 0
+
+    local state = allStates[unitID] or { autoHide = true, progressType = "timed" }
+
+    state.show = duration > 0
+    state.unit = unitID
+    state.changed = true
+    state.duration = duration
+    state.expirationTime = GetTime() + duration
+    state.index = GetTime()
+
+    allStates[unitID] = state
+
+    return allStates, state
+  end
+
+  function Context:GenericTimedTriggerStateUpdaterLogicWithSelfTargetCheck(
+      allStates,
+      event,
+      unitName,
+      duration,
+      isTargetSelf
+  )
+    if event == "OPTIONS" then
+      return allStates, nil
+    end
+
+    if isTargetSelf == nil then
+      isTargetSelf = Context:IsMyName(unitName)
+    end
+
+    if not isTargetSelf then
+      return allStates, nil
+    end
+
+    duration = duration or 0
+
+    local state = allStates[""] or { autoHide = true, progressType = "timed" }
+
+    state.changed = true
+    state.show = duration > 0
+    state.duration = duration
+    state.expirationTime = GetTime() + duration
+
+    allStates[""] = state
+
+    return allStates, state
   end
 
   -----------------------------------------------------------------------------------
@@ -292,6 +351,12 @@ function Init()
         interval.executeAt = now + interval.delay
 
         interval.func(unpack(interval.arguments))
+      end
+    end
+
+    if DBM then
+      for name, func in pairs(Context.pendingAugmentDBM) do
+        Context:AugmentDBM(name, func)
       end
     end
   end

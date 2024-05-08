@@ -1,12 +1,5 @@
+-- SOLTI_WA_KALECGOS_HEALTH__DEMON_BAR_UPDATE or SOLTI_WA_KALECGOS_HEALTH__DRAGON_BAR_UPDATE
 function Trigger1(allStates, event, currentHealth, maxHealth)
-  allStates[""] = allStates[""] or {
-    progressType = "static",
-    total = 100,
-    value = 100,
-    changed = true,
-    show = true
-  }
-
   if not currentHealth or not maxHealth then
     return allStates
   end
@@ -19,15 +12,19 @@ function Trigger1(allStates, event, currentHealth, maxHealth)
     value = math.ceil(currentHealth / maxHealth * 1000) / 10
   end
 
-  local allStatesUpdate = {
-    value   = value,
+  local state = allStates[""] or {
+    progressType = "static",
+    total = 100,
+    value = 100,
     changed = true,
-    show    = true,
+    show = true
   }
 
-  for k, v in pairs(allStatesUpdate) do
-    allStates[""][k] = v
-  end
+  state.value = value
+  state.changed = true
+  state.show = true
+
+  allStates[""] = state
 
   return true
 end

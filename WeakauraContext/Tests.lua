@@ -1,7 +1,7 @@
 function Init()
   local LIB_NAME = "SoltiSunwellPackContext"
   LibStub:NewLibrary(LIB_NAME, 1)
-  aura_env.Context = LibStub(LIB_NAME)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
   aura_env.timeoutIDs = {}
   aura_env.intervalIDs = {}
 end
@@ -16,7 +16,7 @@ function Trigger1(event, delay)
   local index = #aura_env.timeoutIDs + 1
   local timeoutIDs = aura_env.timeoutIDs
 
-  local timeoutID = aura_env.Context:SetTimeout(
+  local timeoutID = aura_env.CONTEXT:SetTimeout(
     function()
       print(
         string.format(
@@ -45,11 +45,11 @@ function Trigger2(event, index)
     return false
   end
 
-  aura_env.Context:ClearTimeout(aura_env.timeoutIDs[index])
+  aura_env.CONTEXT:ClearTimeout(aura_env.timeoutIDs[index])
 
   local match = false
 
-  for _, timeout in pairs(aura_env.Context._timeouts.instances) do
+  for _, timeout in pairs(aura_env.CONTEXT._timeouts.instances) do
     if timeout.id == aura_env.timeoutIDs[index] then
       match = true
     end
@@ -101,7 +101,7 @@ function Trigger4(event, delay, argument)
   local index = #aura_env.intervalIDs + 1
   local intervalIDs = aura_env.intervalIDs
 
-  local intervalID = aura_env.Context:SetInterval(
+  local intervalID = aura_env.CONTEXT:SetInterval(
     function(argument)
       print(
         string.format(
@@ -132,11 +132,11 @@ function Trigger5(event, index)
     return false
   end
 
-  aura_env.Context:ClearInterval(aura_env.intervalIDs[index])
+  aura_env.CONTEXT:ClearInterval(aura_env.intervalIDs[index])
 
   local match = false
 
-  for _, interval in pairs(aura_env.Context._intervals.instances) do
+  for _, interval in pairs(aura_env.CONTEXT._intervals.instances) do
     if interval.id == aura_env.intervalIDs[index] then
       match = true
     end
@@ -158,7 +158,7 @@ function Trigger6(event)
   end
 
   for i = 1, #aura_env.intervalIDs do
-    aura_env.Context:ClearInterval(aura_env.intervalIDs[i])
+    aura_env.CONTEXT:ClearInterval(aura_env.intervalIDs[i])
   end
 
   aura_env.intervalIDs = {}
@@ -200,28 +200,24 @@ end
 
 
 -- SOLTI_TEST_AUGMENT_DBM
-function Trigger7(event, argument)
+function Trigger7(event)
   if event == "OPTIONS" then
     return false
   end
 
-  aura_env.Context:AugmentDBM(
-    "Brutallus",
-    function(mod, arg)
-      print(string.format("%s mod augmented. Arg: %d", mod.Name, arg))
-    end,
-    argument
-  )
+  aura_env.CONTEXT.pendingAugmentDBM["Brutallus"] = function(mod)
+    print(string.format("%s mod augmented.", mod.Name))
+  end
 end
 
--- /run WeakAuras.ScanEvents("SOLTI_TEST_AUGMENT_DBM", 123)
+-- /run WeakAuras.ScanEvents("SOLTI_TEST_AUGMENT_DBM")
 -- expect:
--- "Brutallus mod augmented. Arg: 123"
+-- "Brutallus mod augmented."
 -- once
 
--- /run print(#LibStub("SoltiSunwellPackContext")._intervals.instances)
+-- /run print(LibStub("SoltiSunwellPackContext").pendingAugmentDBM["Brutallus"])
 -- expect:
--- 0
+-- nil
 
 -- /run print(DBM:GetMod("Brutallus").isAugmentedBySolti)
 -- expect:

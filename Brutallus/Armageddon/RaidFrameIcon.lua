@@ -1,27 +1,27 @@
+function Init()
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
+end
+
 -- SOLTI_ARMAGEDDON_TRIGGER
-function Trigger1(allStates, event, unitID, isSelfTarget, isSelfClose, duration)
-  if event == "OPTIONS" then
-    return false
+function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duration)
+  local allStates, state = aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithUnitID(
+    allStates,
+    event,
+    unitName,
+    duration
+  )
+
+  if not state then
+    return allStates
   end
 
-  duration = duration or 0
-
-  local state = allStates[unitID] or { autoHide = true, progressType = "timed" }
-
-  state.show = duration > 0
-  state.unit = unitID
-  state.changed = true
-  state.duration = duration
-  state.expirationTime = GetTime() + duration
   state.isSelfTarget = not not isSelfTarget
   state.isSelfClose = not not isSelfClose
-  state.index = GetTime()
 
-  allStates[unitID] = state
-
-  return true
+  return allStates
 end
 
-function Trigger1CustomVariables()
-  return { isSelfTarget = "bool", isSelfClose = "bool" }
-end
+local trigger1CustomVariables =
+{ isSelfTarget = "bool", isSelfClose = "bool" }

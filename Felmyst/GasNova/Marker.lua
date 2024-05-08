@@ -1,108 +1,57 @@
 function Init()
-  aura_env.TRACKED_SPELL_ID = 45855
-  aura_env.nextMarkID = aura_env.config.firstMarkID
-  local SELF_NAME = UnitName("player")
+  local LIB_NAME = "SoltiSunwellPackContext"
+  LibStub:NewLibrary(LIB_NAME, 1)
+  aura_env.CONTEXT = LibStub(LIB_NAME)
 
-  function aura_env:GetRaidUnitIDFromName(name)
-    if name == SELF_NAME then
-      return "player"
-    end
-    for i = 1, GetNumRaidMembers() do
-      local raidUnitID = "raid" .. i
+  aura_env.markIDs = {
+    aura_env.config.firstMarkID,
+    aura_env.config.secondMarkID,
+    aura_env.config.thirdMarkID
+  }
+  aura_env.nextMarkIndex = 1
 
-      if UnitName(raidUnitID) == name then
-        return raidUnitID
-      end
-    end
-  end
-
-  function aura_env:CanSelfMark()
-    for i = 1, GetNumRaidMembers() do
-      local name, rank = GetRaidRosterInfo(i)
-      if name == SELF_NAME then
-        return rank == 2 -- raid lead
-      end
+  function aura_env:UpdateNextMarkIndex()
+    if aura_env.nextMarkIndex == #aura_env.markIDs then
+      aura_env.nextMarkIndex = 1
+    else
+      aura_env.nextMarkIndex = aura_env.nextMarkIndex + 1
     end
   end
 end
 
--- CLEU:SPELL_AURA_APPLIED
-function Trigger1(
-    event,
-    timeStamp,
-    subEvent,
-    sourceGUID,
-    sourceName,
-    sourceFlags,
-    destGUID,
-    destName,
-    destFlags,
-    spellID,
-    spellName,
-    spellSchool,
-    amount
-)
-  if event == "OPTIONS" or spellID ~= aura_env.TRACKED_SPELL_ID then
+-- SOLTI_GAS_NOVA_DURATION_TRIGGER
+function Trigger1(event, unitName, duration)
+  local shouldAbort =
+      event == "OPTIONS"
+      or not UnitExists(unitName)
+      or not aura_env.CONTEXT:IsSelfRaidLead()
+
+  if shouldAbort then
     return false
   end
 
-  if not aura_env:CanSelfMark() then
+  duration = duration or 0
+  local unitRaidTargetIndex = GetRaidTargetIndex(unitName)
+  local nextMarkID = aura_env.markIDs[aura_env.nextMarkIndex]
+
+  if duration > 0 then
+    if unitRaidTargetIndex ~= nextMarkID then
+      SetRaidTarget(unitName, nextMarkID)
+    end
+
+    aura_env:UpdateNextMarkIndex()
+
     return false
   end
 
-  local unitID = aura_env:GetRaidUnitIDFromName(destName)
+  local shouldUnmark =
+      unitRaidTargetIndex == aura_env.markIDs[1]
+      or unitRaidTargetIndex == aura_env.markIDs[2]
+      or unitRaidTargetIndex == aura_env.markIDs[3]
 
-  if not unitID then
-    return false
+  if shouldUnmark then
+    SetRaidTarget(unitName, 0)
   end
-
-  if GetRaidTargetIndex(unitID) ~= aura_env.nextMarkID then
-    SetRaidTarget(unitID, aura_env.nextMarkID)
-  end
-
-  if aura_env.nextMarkID == aura_env.config.firstMarkID then
-    aura_env.nextMarkID = aura_env.config.secondMarkID
-  elseif aura_env.nextMarkID == aura_env.config.secondMarkID then
-    aura_env.nextMarkID = aura_env.config.thirdMarkID
-  else
-    aura_env.nextMarkID = aura_env.config.firstMarkID
-  end
-
-  return false
-end
-
---CLEU:SPELL_AURA_REMOVED, CLEU:UNIT_DIED
-function Trigger2(
-    event,
-    timeStamp,
-    subEvent,
-    sourceGUID,
-    sourceName,
-    sourceFlags,
-    destGUID,
-    destName,
-    destFlags,
-    spellID,
-    spellName,
-    spellSchool,
-    amount
-)
-  if event == "OPTIONS" or (subEvent == "SPELL_AURA_REMOVED" and spellID ~= aura_env.TRACKED_SPELL_ID) then
-    return false
-  end
-
-  if not aura_env:CanSelfMark() then
-    return false
-  end
-
-  local unitID = aura_env:GetRaidUnitIDFromName(destName)
-  local raidTargetIndex = GetRaidTargetIndex(unitID)
-
-  if raidTargetIndex ~= aura_env.config.firstMarkID and raidTargetIndex ~= aura_env.config.secondMarkID and raidTargetIndex ~= aura_env.config.thirdMarkID then
-    return false
-  end
-
-  SetRaidTarget(unitID, 0)
 
   return false
 end

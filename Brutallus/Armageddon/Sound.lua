@@ -1,5 +1,5 @@
 -- SOLTI_ARMAGEDDON_TRIGGER
-function Trigger1(allStates, event, unitID, isSelfTarget, isSelfClose, duration)
+function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duration)
   if event == "OPTIONS" or (not isSelfTarget and not isSelfClose) then
     return false
   end
