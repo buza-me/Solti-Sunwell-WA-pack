@@ -1,4 +1,4 @@
--- SOLTI_ARMAGEDDON_TRIGGER
+-- SOLTI_DELAYED_ARMAGEDDON_TRIGGER
 function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duration)
   if event == "OPTIONS" or (not isSelfTarget and not isSelfClose) then
     return false
@@ -14,7 +14,7 @@ function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duratio
 
   local state = allStates[""] or { autoHide = true, progressType = "timed" }
 
-  state.name = text
+  state.message = text
   state.show = duration > 0
   state.changed = true
   state.duration = duration
@@ -24,3 +24,6 @@ function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duratio
 
   return true
 end
+
+local trigger1CustomVariables =
+{ message = "string" }

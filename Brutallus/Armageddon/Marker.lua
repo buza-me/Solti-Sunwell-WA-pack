@@ -3,7 +3,7 @@ function Init()
 end
 
 -- SOLTI_ARMAGEDDON_TRIGGER
-function Trigger1(event, event, unitName, isSelfTarget, isSelfClose, duration)
+function Trigger1(event, unitName, isSelfTarget, isSelfClose, duration)
   if event == "OPTIONS" or not UnitExists(unitName) then
     return false
   end

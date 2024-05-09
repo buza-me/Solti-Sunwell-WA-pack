@@ -1,4 +1,4 @@
--- SOLTI_ARMAGEDDON_TRIGGER
+-- SOLTI_DELAYED_ARMAGEDDON_TRIGGER
 function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duration)
   if event == "OPTIONS" or (not isSelfTarget and not isSelfClose) then
     return false
