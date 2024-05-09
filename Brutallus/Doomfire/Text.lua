@@ -11,7 +11,7 @@ function Trigger1(allStates, event, linkedUnitName, duration)
   local text = string.format(aura_env.config.text, linkedUnitName)
 
   state.show = duration > 0
-  state.name = text
+  state.message = text
   state.changed = true
   state.duration = duration
   state.expirationTime = GetTime() + duration
@@ -20,3 +20,6 @@ function Trigger1(allStates, event, linkedUnitName, duration)
 
   return true
 end
+
+local trigger1CustomVariables =
+{ message = "string" }

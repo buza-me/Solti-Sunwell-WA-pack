@@ -28,7 +28,7 @@ function Trigger1(
     return false
   end
 
-  local isSourceSelf = aura_env.CONTEXT:IsMyName(destName)
+  local isSourceSelf = aura_env.CONTEXT:IsMyName(sourceName)
 
   if isSourceSelf then
     SendChatMessage(aura_env.config.chatMessage, "SAY")
@@ -38,7 +38,7 @@ function Trigger1(
     SendChatMessage(
       string.format(
         aura_env.config.raidWarningMessage,
-        aura_env.CONTEXT:GetClassColorName(destName)
+        aura_env.CONTEXT:GetClassColorName(sourceName)
       ),
       "RAID_WARNING"
     )

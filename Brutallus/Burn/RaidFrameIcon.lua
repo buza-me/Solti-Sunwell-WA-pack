@@ -6,6 +6,9 @@ end
 
 -- SOLTI_BURN_TRIGGER
 function Trigger1(allStates, event, unitName, duration)
+  if not aura_env.CONTEXT.isInitialized then
+    return allStates
+  end
   return aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithUnitID(
     allStates,
     event,

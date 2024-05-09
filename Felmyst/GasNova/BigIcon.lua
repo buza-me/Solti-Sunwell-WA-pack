@@ -10,6 +10,7 @@ function Trigger1(allStates, event, isDebuffed, isSafe, numberOfPlayersNear)
   state.changed = true
   state.isSafe = not not isSafe
   state.stacks = numberOfPlayersNear
+  state.stacksText = tostring(numberOfPlayersNear)
 
   allStates[""] = state
 
@@ -17,4 +18,4 @@ function Trigger1(allStates, event, isDebuffed, isSafe, numberOfPlayersNear)
 end
 
 local trigger1CustomVariables =
-{ isSafe = "bool" }
+{ isSafe = "bool", stacksText = "string" }

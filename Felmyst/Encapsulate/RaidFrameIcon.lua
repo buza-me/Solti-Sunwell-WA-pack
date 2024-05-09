@@ -6,6 +6,10 @@ end
 
 -- SOLTI_ENCAPSULATE_TRIGGER
 function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duration, expirationTime)
+  if not aura_env.CONTEXT.isInitialized then
+    return allStates
+  end
+
   local allStates, state = aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithUnitID(
     allStates,
     event,

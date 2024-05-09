@@ -6,6 +6,10 @@ end
 
 -- SOLTI_GAS_NOVA_DURATION_TRIGGER
 function Trigger2(allStates, event, unitName, duration)
+  if not aura_env.CONTEXT.isInitialized then
+    return allStates
+  end
+
   return aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithUnitID(
     allStates,
     event,

@@ -2,8 +2,8 @@ function Init()
   aura_env.MARK_TRIGGER_EVENT = "SOLTI_MARK_TRIGGER"
 end
 
--- SOLTI_ARCANE_BOLT_TRIGGER
-function Trigger1(event, unitName, isSelfTarget, isSelfClose, duration)
+-- SOLTI_ARCANE_BOLT_MARK_TRIGGER
+function Trigger1(event, unitName, duration)
   if event == "OPTIONS" or not UnitExists(unitName) then
     return false
   end

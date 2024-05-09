@@ -11,12 +11,13 @@ function Trigger1(event, unitID, markID, duration)
   end
 
   duration = duration or 0
+  local CONTEXT = aura_env.CONTEXT
 
-  aura_env.CONTEXT:SetRaidMark(unitID, markID)
+  CONTEXT:SetRaidMark(unitID, markID)
 
-  aura_env.CONTEXT:SetTimeout(
+  CONTEXT:SetTimeout(
     function()
-      aura_env.CONTEXT:UnsetRaidMark(unitID, markID)
+      CONTEXT:UnsetRaidMark(unitID, markID)
     end,
     duration
   )

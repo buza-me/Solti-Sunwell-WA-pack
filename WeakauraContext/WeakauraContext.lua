@@ -82,7 +82,7 @@ function Init()
     return IsRaidOfficer() == 1
   end
 
-  function aura_env:GetUnitTargetAndGUID(unitName)
+  function Context:GetUnitTargetAndGUID(unitName)
     local unitTargetName = nil
     local unitGUID = nil
 
@@ -105,15 +105,15 @@ function Init()
       return self._paintedNamesCache[unitName]
     end
 
-    local paintedName = WeakAuras.WA_ClassColorName(unitName)
+    local classColoredName = WeakAuras.WA_ClassColorName(unitName)
 
-    if #paintedName == 0 then
-      paintedName = unitName
+    if #classColoredName == 0 then
+      classColoredName = unitName
     end
 
-    self._paintedNamesCache[unitName] = paintedName
+    self._paintedNamesCache[unitName] = classColoredName
 
-    return unitName
+    return classColoredName
   end
 
   function Context:GetRaidMarkID(unit)
@@ -223,7 +223,7 @@ function Init()
 
     self.pendingAugmentDBM[modName] = nil
 
-    augmentFunction(mod)
+    augmentFunction(mod, DBM_SavedVars.AddOns[modName])
   end
 
   function Context:GenericTimedTriggerStateUpdaterLogicWithUnitID(allStates, event, unitName, duration)
@@ -231,7 +231,7 @@ function Init()
       return allStates, nil
     end
 
-    local unitID = aura_env.CONTEXT.roster[unitName]
+    local unitID = Context.roster[unitName]
 
     if not unitID then
       return allStates, nil
@@ -285,6 +285,8 @@ function Init()
 
     return allStates, state
   end
+
+  Context.isInitialized = true
 
   -----------------------------------------------------------------------------------
   --------------------------   INIT TRIGGER LOGIC   ---------------------------------

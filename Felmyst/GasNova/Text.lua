@@ -12,7 +12,7 @@ function Trigger1(allStates, event, isDebuffed, isSafe)
     text = aura_env.config.safeMessage
   end
 
-  state.name = text
+  state.message = text
   state.show = not not isDebuffed
   state.changed = true
   state.isSafe = not not isSafe
@@ -23,4 +23,4 @@ function Trigger1(allStates, event, isDebuffed, isSafe)
 end
 
 local trigger1CustomVariables =
-{ isSafe = "bool" }
+{ isSafe = "bool", message = "string" }

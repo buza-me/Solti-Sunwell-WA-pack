@@ -13,6 +13,7 @@ function Init()
   aura_env.TRACKED_SPELL_NAME = TRACKED_SPELL_NAME
   aura_env.DURATION = (TRACKED_SPELL_CASTING_TIME / 1000) + PROJECTILE_TRAVEL_TIME
   aura_env.TRIGGER_EVENT = "SOLTI_ARCANE_BOLT_TRIGGER"
+  aura_env.MARK_TRIGGER_EVENT = "SOLTI_ARCANE_BOLT_MARK_TRIGGER"
   aura_env.lastTriggerExecutionTime = GetTime()
   aura_env.trackedSpellCastStartTime = nil
   aura_env.initialBossTargetName = nil
@@ -47,7 +48,7 @@ function Trigger1(
     return false
   end
 
-  local _, bossTargetName = aura_env.Config:GetUnitTargetAndGUID(aura_env.BOSS_NAME)
+  local bossTargetName = aura_env.CONTEXT:GetUnitTargetAndGUID(aura_env.BOSS_NAME)
   aura_env.initialBossTargetName = bossTargetName
   aura_env.trackedSpellCastStartTime = GetTime()
 
@@ -68,9 +69,9 @@ function Trigger2()
     aura_env.lastTriggerExecutionTime = now
   end
 
-  local bossTargetName = aura_env.Config:GetUnitTargetAndGUID(aura_env.BOSS_NAME)
+  local bossTargetName = aura_env.CONTEXT:GetUnitTargetAndGUID(aura_env.BOSS_NAME)
   local isNotTargetSwap = bossTargetName == aura_env.initialBossTargetName
-  local isNotTimeForTargetSwap = now < aura_env.trackedSpellCastStartTime + aura_env.BOSS_TARGET_SWAP_DELAY
+  local isNotTimeForTargetSwap = now < (aura_env.trackedSpellCastStartTime + aura_env.BOSS_TARGET_SWAP_DELAY)
 
   -- Boss targets the real target around half a second after he starts casting
   if isNotTargetSwap and isNotTimeForTargetSwap then
@@ -90,6 +91,12 @@ function Trigger2()
   else
     isSelfTooCloseToBossTarget = aura_env:IsTooClose(bossTargetName)
   end
+
+  WeakAuras.ScanEvents(
+    aura_env.MARK_TRIGGER_EVENT,
+    bossTargetName,
+    aura_env.DURATION
+  )
 
   if not isSelfBossTarget and not isSelfTooCloseToBossTarget then
     aura_env:Reset()

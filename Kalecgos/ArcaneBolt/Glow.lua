@@ -6,5 +6,14 @@ end
 
 -- SOLTI_ARCANE_BOLT_TRIGGER
 function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duration)
-  return aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithUnitID(allStates, event, unitName, duration)
+  if not aura_env.CONTEXT.isInitialized then
+    return allStates
+  end
+
+  return aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithUnitID(
+    allStates,
+    event,
+    unitName,
+    duration
+  )
 end

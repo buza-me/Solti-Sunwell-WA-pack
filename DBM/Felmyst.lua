@@ -3,22 +3,22 @@ function Init()
   LibStub:NewLibrary(LIB_NAME, 1)
   local Context = LibStub(LIB_NAME)
 
-  Context.pendingAugmentDBM = Context:UseFallback(Context.pendingAugmentDBM, {})
+  Context.pendingAugmentDBM = Context.pendingAugmentDBM or {}
 
-  Context.pendingAugmentDBM["Felmyst"] = function(Mod)
+  Context.pendingAugmentDBM["Felmyst"] = function(Mod, options)
     Mod:AddOption(
       "UseSoltiMod",
-      Context:UseFallback(Mod.Options.UseSoltiMod, true),
+      Context:UseFallback(options.UseSoltiMod, true),
       "Use Solti Netherwing boss mod patches"
     )
     Mod:AddOption(
       "WarnEncapsulate",
-      Context:UseFallback(Mod.Options.WarnEncapsulate, true),
+      Context:UseFallback(options.WarnEncapsulate, true),
       "Warn before Encapsulate cooldown ends"
     )
     Mod:AddOption(
       "TrackEncapsulate",
-      Context:UseFallback(Mod.Options.TrackEncapsulate, true),
+      Context:UseFallback(options.TrackEncapsulate, true),
       "Show Encapsulate CD"
     )
 

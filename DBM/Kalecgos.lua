@@ -3,9 +3,15 @@ function Init()
   LibStub:NewLibrary(LIB_NAME, 1)
   local Context = LibStub(LIB_NAME)
 
-  Context.pendingAugmentDBM = Context:UseFallback(Context.pendingAugmentDBM, {})
+  Context.pendingAugmentDBM = Context.pendingAugmentDBM or {}
 
-  Context.pendingAugmentDBM["Kal"] = function(Mod)
+  Context.pendingAugmentDBM["Kal"] = function(Mod, options)
+    Mod:AddOption(
+      "UseSoltiMod",
+      Context:UseFallback(options.UseSoltiMod, true),
+      "Use Solti Netherwing boss mod patches"
+    )
+
     local NO_BROADCAST = not aura_env.config.shouldBroadcast
     local PORTAL_DURATION = 15
     local PORTAL_COOLDOWN = 20

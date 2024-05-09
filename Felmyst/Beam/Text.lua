@@ -6,6 +6,9 @@ end
 
 -- SOLTI_BEAM_TRIGGER
 function Trigger1(allStates, event, unitName, duration, isTargetSelf)
+  if not aura_env.CONTEXT.isInitialized then
+    return allStates
+  end
   return aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithSelfTargetCheck(
     allStates,
     event,

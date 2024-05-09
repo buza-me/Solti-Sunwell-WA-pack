@@ -26,7 +26,8 @@
     "IsRaidLeader",
     "IsRaidOfficer",
     "UnitExists",
-    "WA_IterateGroupMembers"
+    "WA_IterateGroupMembers",
+    "DBM_SavedVars"
   ],
   "Lua.diagnostics.disable": [
     "duplicate-set-field",

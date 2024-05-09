@@ -3,26 +3,26 @@ function Init()
   LibStub:NewLibrary(LIB_NAME, 1)
   local Context = LibStub(LIB_NAME)
 
-  Context.pendingAugmentDBM = Context:UseFallback(Context.pendingAugmentDBM, {})
+  Context.pendingAugmentDBM = Context.pendingAugmentDBM or {}
 
-  Context.pendingAugmentDBM["Brutallus"] = function(Mod)
+  Context.pendingAugmentDBM["Brutallus"] = function(Mod, options)
     Mod:RegisterEvents(
       "CHAT_MSG_MONSTER_EMOTE"
     )
 
     Mod:AddOption(
       "UseSoltiMod",
-      Context:UseFallback(Mod.Options.UseSoltiMod, true),
+      Context:UseFallback(options.UseSoltiMod, true),
       "Use Solti Netherwing boss mod patches"
     )
     Mod:AddOption(
       "WarnDoomfire",
-      Context:UseFallback(Mod.Options.WarnDoomfire, true),
+      Context:UseFallback(options.WarnDoomfire, true),
       "Show Doomfire timers"
     )
     Mod:AddOption(
       "WarnArmageddon",
-      Context:UseFallback(Mod.Options.WarnArmageddon, true),
+      Context:UseFallback(options.WarnArmageddon, true),
       "Show Armageddon timers"
     )
 

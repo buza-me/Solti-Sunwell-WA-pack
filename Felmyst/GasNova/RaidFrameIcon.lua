@@ -37,10 +37,14 @@ function Trigger1(allStates, event, prefix, text)
 end
 
 local trigger1CustomVariables =
-{ stacks = "number", stacksText = "string" }
+{ stacks = "number", isSafe = "bool", stacksText = "string" }
 
 -- SOLTI_GAS_NOVA_DURATION_TRIGGER
 function Trigger2(allStates, event, unitName, duration)
+  if not aura_env.CONTEXT.isInitialized then
+    return allStates
+  end
+
   return aura_env.CONTEXT:GenericTimedTriggerStateUpdaterLogicWithUnitID(
     allStates,
     event,

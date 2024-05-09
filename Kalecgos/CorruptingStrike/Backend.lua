@@ -7,7 +7,6 @@ function Init()
   --aura_env.TRACKED_SPELL_ID = 25222 --Renew
   aura_env.TRIGGER_EVENT = "SOLTI_CORRUPTING_STRIKE_TRIGGER"
   aura_env.DURATION = 3
-  aura_env.SELF_NAME = UnitName("player")
 end
 
 -- CLEU:SPELL_AURA_APPLIED

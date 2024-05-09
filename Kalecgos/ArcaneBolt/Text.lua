@@ -14,7 +14,7 @@ function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duratio
 
   local state = allStates[""] or { autoHide = true, progressType = "timed" }
 
-  state.name = text
+  state.message = text
   state.show = true
   state.changed = true
   state.duration = duration
@@ -24,3 +24,6 @@ function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duratio
 
   return true
 end
+
+local trigger1CustomVariables =
+{ message = "string" }

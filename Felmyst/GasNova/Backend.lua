@@ -75,7 +75,7 @@ function Trigger1()
   return false
 end
 
--- CLEU:SPELL_AURA_APPLIED,CLEU:SPELL_AURA_REMOVED,CLEU:UNIT_DIED
+-- CLEU:SPELL_AURA_APPLIED,CLEU:SPELL_AURA_REFRESH,CLEU:SPELL_AURA_REMOVED,CLEU:UNIT_DIED
 function Trigger2(
     event,
     timeStamp,
@@ -95,7 +95,10 @@ function Trigger2(
     return false
   end
 
-  local isSpellAuraEvent = subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REMOVED"
+  local isSpellAuraEvent =
+      subEvent == "SPELL_AURA_APPLIED"
+      or subEvent == "SPELL_AURA_REFRESH"
+      or subEvent == "SPELL_AURA_REMOVED"
 
   if isSpellAuraEvent and spellID ~= aura_env.TRACKED_SPELL_ID then
     return false
@@ -103,7 +106,7 @@ function Trigger2(
 
   local duration = 0
 
-  if subEvent == "SPELL_AURA_APPLIED" then
+  if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" then
     duration = aura_env.DURATION
   end
 
