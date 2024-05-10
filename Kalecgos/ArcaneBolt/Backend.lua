@@ -6,13 +6,15 @@ function Init()
   aura_env.BOSS_NAME = "Kalecgos"
   aura_env.TRACKED_SPELL_ID = 41483
   --aura_env.BOSS_NAME = "Solti"
-  --aura_env.TRACKED_SPELL_ID = 25213
+  --aura_env.TRACKED_SPELL_ID = 25213 -- Greater Heal test
   aura_env.BOSS_TARGET_SWAP_DELAY = 0.5
-  local PROJECTILE_TRAVEL_TIME = 1.5
+  aura_env.EXTRA_NOTIFICATION_TIME = 0
+  local PROJECTILE_TRAVEL_TIME = 0.5
   local TRACKED_SPELL_NAME, _, _, _, _, _, TRACKED_SPELL_CASTING_TIME, _, _ = GetSpellInfo(aura_env.TRACKED_SPELL_ID)
   aura_env.TRACKED_SPELL_NAME = TRACKED_SPELL_NAME
   aura_env.DURATION = (TRACKED_SPELL_CASTING_TIME / 1000) + PROJECTILE_TRAVEL_TIME
   aura_env.TRIGGER_EVENT = "SOLTI_ARCANE_BOLT_TRIGGER"
+  aura_env.INDICATOR_TRIGGER_EVENT = "SOLTI_ARCANE_BOLT_INDICATOR_TRIGGER"
   aura_env.MARK_TRIGGER_EVENT = "SOLTI_ARCANE_BOLT_MARK_TRIGGER"
   aura_env.lastTriggerExecutionTime = GetTime()
   aura_env.trackedSpellCastStartTime = nil
@@ -98,6 +100,14 @@ function Trigger2()
     aura_env.DURATION
   )
 
+  WeakAuras.ScanEvents(
+    aura_env.INDICATOR_TRIGGER_EVENT,
+    bossTargetName,
+    isSelfBossTarget,
+    isSelfTooCloseToBossTarget,
+    aura_env.DURATION
+  )
+
   if not isSelfBossTarget and not isSelfTooCloseToBossTarget then
     aura_env:Reset()
     return false
@@ -108,7 +118,7 @@ function Trigger2()
     bossTargetName,
     isSelfBossTarget,
     isSelfTooCloseToBossTarget,
-    aura_env.DURATION
+    aura_env.DURATION + aura_env.EXTRA_NOTIFICATION_TIME
   )
 
   aura_env:Reset()

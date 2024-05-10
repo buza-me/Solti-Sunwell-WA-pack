@@ -15,10 +15,6 @@ function Init()
   aura_env.lastScanTime = GetTime()
   aura_env.lastSyncTime = GetTime()
 
-  aura_env.CompareStrings = function(a, b)
-    return a < b
-  end
-
   function aura_env:Notify(event, currentHealth, maxHealth)
     WeakAuras.ScanEvents(
       event,
@@ -66,20 +62,11 @@ function Trigger2()
   local firstPlayerWithDragonTarget = nil
   local firstPlayerWithDemonTarget = nil
 
-  local playersWithSunwellPack = aura_env.CONTEXT.playersWithSunwellPack
+  local sortedNamesOfPlayersWithSunwellPack =
+      aura_env.CONTEXT.sortedNamesOfPlayersWithSunwellPack
 
-  playersWithSunwellPack[aura_env.CONTEXT.SELF_NAME] = true
-
-  local sortedPlayersWithSunwellPack = {}
-
-  for unitName, _ in pairs(playersWithSunwellPack) do
-    table.insert(sortedPlayersWithSunwellPack, unitName)
-  end
-
-  table.sort(sortedPlayersWithSunwellPack, aura_env.CompareStrings)
-
-  for i = 1, #sortedPlayersWithSunwellPack do
-    local raidUnitName = sortedPlayersWithSunwellPack[i]
+  for i = 1, #sortedNamesOfPlayersWithSunwellPack do
+    local raidUnitName = sortedNamesOfPlayersWithSunwellPack[i]
     local raidUnitID = aura_env.CONTEXT.roster[raidUnitName]
 
     local raidUnitTargetID = raidUnitID .. "target"

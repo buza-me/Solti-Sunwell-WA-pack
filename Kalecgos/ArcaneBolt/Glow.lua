@@ -4,7 +4,7 @@ function Init()
   aura_env.CONTEXT = LibStub(LIB_NAME)
 end
 
--- SOLTI_ARCANE_BOLT_TRIGGER
+-- SOLTI_ARCANE_BOLT_INDICATOR_TRIGGER
 function Trigger1(allStates, event, unitName, isSelfTarget, isSelfClose, duration)
   if not aura_env.CONTEXT.isInitialized then
     return allStates

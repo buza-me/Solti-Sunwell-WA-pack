@@ -14,10 +14,15 @@ function Init()
 
   Context.SUNWELL_PACK_SYNC_MSG_PREFIX = "SOLTI_SUNWELL_WA_CHECK"
   Context.SELF_NAME = UnitName("player")
+  Context.playersWithSunwellPackSortTimeoutID = nil
 
   Context.playersWithSunwellPack = Context:UseFallback(
     Context.playersWithSunwellPack,
     { [Context.SELF_NAME] = true }
+  )
+  Context.sortedNamesOfPlayersWithSunwellPack = Context:UseFallback(
+    Context.sortedNamesOfPlayersWithSunwellPack,
+    { Context.SELF_NAME }
   )
   Context.roster = Context:UseFallback(
     Context.roster,
@@ -286,6 +291,16 @@ function Init()
     return allStates, state
   end
 
+  function Context:SendPlayersWithSunwellPackSync()
+    SendAddonMessage(
+      Context.SUNWELL_PACK_SYNC_MSG_PREFIX,
+      Context.SELF_NAME,
+      "RAID"
+    )
+  end
+
+  Context:UpdateRoster()
+  Context:SendPlayersWithSunwellPackSync()
   Context.isInitialized = true
 
   -----------------------------------------------------------------------------------
@@ -294,44 +309,66 @@ function Init()
 
   aura_env.lastGameLoopTime = GetTime()
 
-  function aura_env:CHAT_MSG_ADDON(prefix, name)
+  function aura_env.CompareStrings(a, b)
+    return a < b
+  end
+
+  function aura_env.CHAT_MSG_ADDON(prefix, name)
     if prefix ~= Context.SUNWELL_PACK_SYNC_MSG_PREFIX then
+      return false
+    end
+
+    if Context.playersWithSunwellPack[name] then
       return false
     end
 
     Context.playersWithSunwellPack[name] = true
 
+    if Context.playersWithSunwellPackSortTimeoutID then
+      return false
+    end
+
+    local env = aura_env
+
+    local timeoutID = Context:SetTimeout(
+      function()
+        Context.playersWithSunwellPackSortTimeoutID = nil
+        Context.sortedNamesOfPlayersWithSunwellPack = {}
+
+        for unitName, _ in pairs(Context.playersWithSunwellPack) do
+          table.insert(Context.sortedNamesOfPlayersWithSunwellPack, unitName)
+        end
+
+        table.sort(
+          Context.sortedNamesOfPlayersWithSunwellPack,
+          env.CompareStrings
+        )
+      end,
+      1
+    )
+
+    Context.playersWithSunwellPackSortTimeoutID = timeoutID
+
     return false
   end
 
-  function aura_env:PLAYER_REGEN_DISABLED()
-    for name, _ in pairs(Context.playersWithSunwellPack) do
-      if not UnitExists(name) then
-        Context.playersWithSunwellPack[name] = nil
-      end
-    end
+  function aura_env.PLAYER_REGEN_DISABLED()
+    Context.playersWithSunwellPack = { [Context.SELF_NAME] = true }
+    Context.sortedNamesOfPlayersWithSunwellPack = { Context.SELF_NAME }
 
     Context:SetTimeout(
-      function()
-        SendAddonMessage(
-          Context.SUNWELL_PACK_SYNC_MSG_PREFIX,
-          Context.SELF_NAME,
-          "RAID"
-        )
-      end,
-      0.1
+      Context.SendPlayersWithSunwellPackSync,
+      1
     )
 
     return false
   end
 
-  function aura_env:RAID_ROSTER_UPDATE()
+  function aura_env.RAID_ROSTER_UPDATE()
     Context:UpdateRoster()
   end
 
-  aura_env:RAID_ROSTER_UPDATE()
-
-  function aura_env:OnUpdate()
+  function aura_env.OnUpdate()
     local now = GetTime()
 
     if now - aura_env.lastGameLoopTime < aura_env.config.timerThrottleThreshold then
@@ -379,5 +416,5 @@ end
 
 -- every frame
 function Trigger2()
-  aura_env:OnUpdate()
+  aura_env.OnUpdate()
 end
