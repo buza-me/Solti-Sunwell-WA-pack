@@ -3,8 +3,8 @@ function Init()
   LibStub:NewLibrary(LIB_NAME, 1)
   aura_env.CONTEXT = LibStub(LIB_NAME)
 
-  aura_env.TRACKED_SPELL_ID = 45032
-  --aura_env.TRACKED_SPELL_ID = 25222 --Renew
+  aura_env.TRACKED_SPELL_NAME = "Curse of Boundless Agony"
+  --aura_env.TRACKED_SPELL_NAME = "Renew"
   aura_env.TRIGGER_EVENT = "SOLTI_COA_TRIGGER"
   aura_env.DURATION = 30
 end
@@ -25,15 +25,27 @@ function Trigger1(
     spellSchool,
     amount
 )
-  if event == "OPTIONS" or spellID ~= aura_env.TRACKED_SPELL_ID then
+  local shouldAbort =
+      event == "OPTIONS"
+      or spellName ~= aura_env.TRACKED_SPELL_NAME
+      or not UnitExists(destName)
+
+  if shouldAbort then
     return false
+  end
+
+  -- a little trick, isMyName == false will turn off personal "run out" notifications in normal raid difficulty
+  local isMyName = false
+
+  if aura_env.CONTEXT:IsHeroic() then
+    isMyName = aura_env.CONTEXT:IsMyName(destName)
   end
 
   WeakAuras.ScanEvents(
     aura_env.TRIGGER_EVENT,
     destName,
     aura_env.DURATION,
-    aura_env.CONTEXT:IsMyName(destName)
+    isMyName
   )
 
   return false
@@ -55,7 +67,12 @@ function Trigger2(
     spellSchool,
     amount
 )
-  if event == "OPTIONS" or (subEvent == "SPELL_AURA_REMOVED" and spellID ~= aura_env.TRACKED_SPELL_ID) then
+  local shouldAbort =
+      event == "OPTIONS"
+      or (subEvent == "SPELL_AURA_REMOVED" and spellName ~= aura_env.TRACKED_SPELL_NAME)
+      or not UnitExists(destName)
+
+  if shouldAbort then
     return false
   end
 

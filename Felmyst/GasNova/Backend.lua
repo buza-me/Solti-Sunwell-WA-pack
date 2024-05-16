@@ -4,7 +4,7 @@ function Init()
   aura_env.CONTEXT = LibStub(LIB_NAME)
 
   aura_env.TRACKED_SPELL_ID = 45855
-  --aura_env.TRACKED_SPELL_ID = 25222
+  --aura_env.TRACKED_SPELL_ID = 25222 -- Renew test
   aura_env.DURATION = 30
   aura_env.CHAT_MSG_ADDON_PREFIX = "SOLTI_WA_GAS_NOVA"
   aura_env.TRIGGER_EVENT = "SOLTI_GAS_NOVA_TRIGGER"
@@ -116,7 +116,7 @@ function Trigger2(
     duration
   )
 
-  if not aura_env.CONTEXT:IsMyName(destName) then
+  if not aura_env.CONTEXT:IsMyName(destName) or not aura_env.CONTEXT:IsHeroic() then
     return
   end
 

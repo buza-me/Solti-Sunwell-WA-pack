@@ -6,32 +6,34 @@ function Init()
   aura_env.CHAT_MSG_ADDON_PREFIX = "SOLTI_WA_GAS_NOVA"
 end
 
--- CHAT_MSG_ADDON
-function Trigger1(allStates, event, prefix, text)
-  if prefix ~= aura_env.CHAT_MSG_ADDON_PREFIX then
+-- GAS_NOVA_RANGE_MESSAGES_UPDATE
+function Trigger1(allStates, event, messages)
+  if event == "OPTIONS" or not messages then
     return allStates
   end
 
-  local unitName, isDebuffed, isSafe = text:match("(%S+)%s+(%S+)%s+(%S+)")
-  local stacks = text:match("%s+(%d+)") -- run separately for safety because older versions of the WA did not have stacks
+  for name, message in pairs(messages) do
+    -- parse the name from the message because the older versions of the WA included it into the message, and some people still use the older versions
+    local unitName, isDebuffed, isSafe = message:match("(%S+)%s+(%S+)%s+(%S+)")
+    -- run separately for safety because older versions of the WA did not have stacks
+    local stacks = message:match("%s+(%d+)")
 
-  local unitID = aura_env.CONTEXT.roster[unitName]
+    local unitID = aura_env.CONTEXT.roster[unitName]
 
-  if not unitID or not UnitExists(unitID) then
-    return false
+    if unitID and UnitExists(unitID) then
+      local state = allStates[unitID] or { progressType = "static" }
+
+      state.unit = unitID
+      state.show = isDebuffed == 'true'
+      state.isSafe = isSafe == 'true'
+      state.changed = true
+      state.stacks = tonumber(stacks or -1)
+      state.stacksText = stacks or "unknown"
+      state.index = GetTime()
+
+      allStates[unitID] = state
+    end
   end
-
-  local state = allStates[unitID] or { progressType = "static" }
-
-  state.unit = unitID
-  state.show = isDebuffed == 'true'
-  state.isSafe = isSafe == 'true'
-  state.changed = true
-  state.stacks = tonumber(stacks or -1)
-  state.stacksText = stacks or "unknown"
-  state.index = GetTime()
-
-  allStates[unitID] = state
 
   return allStates
 end
