@@ -35,7 +35,7 @@ function Trigger1(event, prefix, text, channel, sender)
         messages
       )
     end,
-    20
+    0.020
   )
 
   state.debounceTimeoutID = timeoutID
