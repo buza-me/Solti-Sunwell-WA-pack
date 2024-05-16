@@ -120,7 +120,7 @@ For the same reason you need to disable the Kalecgos DBM spectral realm frame, b
 - A debuffed player standing close (15 yards) to the other players will get a red "Run out!" text, and an "Error" sound.
 - Red numbers inside the big icon represent the number of players near.
 - A debuffed player standing away from the other players will get a green "Safe distance!" text and the error sound will stop.
-- A debuffed player gets notified about the debuff dispel with a green "dispelled" text message and a notification type message.
+- A debuffed player gets notified about the debuff dispel with a green "dispelled" text message and a notification type sound.
 - Large debuff icons with a text message are displayed on top of a debuffed players' raid frames.
 - Text message changes with three conditions.
 - If a debuffed player is broadcasting their range status, text will change from red to green, from "unsafe" to "dispel".
