@@ -131,8 +131,8 @@ For the same reason you need to disable the Kalecgos DBM spectral realm frame, b
 - If Felmyst changes her target during the fight, and the new target is not top on threat, Encapsulate cast will be registered.
 - If a player in a raid get the Encapsulate debuff, Encapsulate cast will be registered.
 - Encapsulate target gets notified with a large Encapsulate icon, "Stay!" text message and a notification type sound.
-- Players within ~20 yards from an Encapsulate target get notified with a large Encapsulate icon, with red "Run away!" text and the "Run Away" WA sound.
-- Players further than 20 yards away from an Encapsulate target get notified with a large Encapsulate icon, green "Safe!" text and a notification type sound.
+- Players within ~25 yards from an Encapsulate target get notified with a large Encapsulate icon, with red "Run away!" text and the "Run Away" WA sound.
+- Players further than 25 yards away from an Encapsulate target get notified with a large Encapsulate icon, green "Safe!" text and a notification type sound.
 
 **Corrosion:**
 
