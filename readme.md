@@ -43,7 +43,7 @@ For the same reason you need to disable the Kalecgos DBM spectral realm frame, b
 - Triggers when the boss swaps the target during the cast. Around half a second after he starts casting.
 - Target gets notified with a big icon, text message, screen glow (DBM feature) and a "Run Away" sound.
 - Target sends a chat message saying "Spark on me!"
-- The raid frame of a target glows with red lines and a relatively large bebuff icon with "spark" text is displayed on the raid frame.
+- The raid frame of a target glows with red lines and a relatively large debuff icon with "spark" text is displayed on the raid frame.
 - Players close to a target (~10 yards) get notified with a big icon, text message and a "Run Away" sound.
 
 **Curse of Boundless Agony:**
