@@ -115,19 +115,19 @@ For the same reason you need to disable the Kalecgos DBM spectral realm frame, b
 
 **Gas Nova:**  
 
-- Three players with the Gas Nova debuff get marked with Cross, Square and Circle (configurable).
-- Shows a large Gas Nova icon on top of debuffed players' raid frames.
-- Targets get notified with a messenger type sound, a big Gas Nova icon and a text message that changes.
-- Targets start broadcasting the amount of players close to them to the other raid members.
-- A debuffed player standing close (15 yards) to the other players will get a red "Run out!" text, and an "Error" sound.
-- Red numbers inside the big icon represent the number of players near.
-- A debuffed player standing away from the other players will get a green "Safe distance!" text and the error sound will stop.
-- A debuffed player gets notified about the debuff dispel with a green "dispelled" text message and a notification type sound.
-- Large debuff icons with a text message are displayed on top of a debuffed players' raid frames.
-- Text message changes with three conditions.
-- If a debuffed player is broadcasting their range status, text will change from red to green, from "unsafe" to "dispel".
-- If a debuffed player is not broadcasting their range status (does not have the WA pack installed) the text will be yellow "watch".
 - Three players with the Gas Nova debuff get marked with Cross, Square and Circle (configurable).  
+- Shows a large Gas Nova icon on top of debuffed players' raid frames.  
+- Targets get notified with a messenger type sound, a big Gas Nova icon and a text message that changes.  
+- Targets start broadcasting the amount of players close to them to the other raid members.  
+- A debuffed player standing close (15 yards) to the other players will get a red "Run out!" text, and an "Error" sound.  
+- Red numbers inside the big icon represent the number of players near.  
+- A debuffed player standing away from the other players will get a green "Safe distance!" text and the error sound will stop.  
+- A debuffed player gets notified about the debuff dispel with a green "dispelled" text message and a notification type sound.  
+- Large debuff icons with a text message are displayed on top of a debuffed players' raid frames.  
+- Text message changes with three conditions.  
+- If a debuffed player is broadcasting their range status, text will change from red to green, from "unsafe" to "dispel".  
+- If a debuffed player is not broadcasting their range status (does not have the WA pack installed) the text will be yellow "watch".  
+- Three players with the Gas Nova debuff get marked with Cross, Square and Circle (configurable).    
 - Shows a large Gas Nova icon on top of debuffed players' raid frames.  
 - Targets get notified with a messenger type sound, a big Gas Nova icon and a text message that changes.  
 - Targets start broadcasting the amount of players close to them to the other raid members.  
