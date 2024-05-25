@@ -150,10 +150,8 @@ function Init()
 
   function Context:IsTalentLearned(tab, talentId)
     local _, _, _, _, pointsSpent = GetTalentInfo(tab, talentId)
-    if pointsSpent > 0 then
-      return true
-    end
-    return false
+
+    return pointsSpent > 0
   end
 
   function Context:IsSelfTank()
