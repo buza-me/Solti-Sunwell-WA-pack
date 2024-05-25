@@ -150,20 +150,18 @@ function Init()
 
   function Context:IsTalentLearned(tab, talentId)
     local _, _, _, _, pointsSpent = GetTalentInfo(tab, talentId)
-    if pointsSpent > 0 then return true end
+    if pointsSpent > 0 then
+      return true
+    end
     return false
   end
 
   function Context:IsSelfTank()
-    if UnitClass("player") == "Druid" and GetShapeshiftForm() == 1 and self:IsTalentLearned(2, 5) then --thick hide
-      return true
-    elseif UnitClass("player") == "Warrior" and self:IsTalentLearned(3, 19) then                       --shield slam
-      return true
-    elseif UnitClass("player") == "Paladin" and self:IsTalentLearned(2, 19) then                       --holy shield
-      return true
-    end
+    local playerClass = UnitClass("player")
 
-    return false
+    return (playerClass == "Druid" and GetShapeshiftForm() == 1 and self:IsTalentLearned(2, 5))
+        or (playerClass == "Warrior" and self:IsTalentLearned(3, 19))
+        or (playerClass == "Paladin" and self:IsTalentLearned(2, 19))
   end
 
   function Context:GetUnitTargetAndGUID(unitName)
