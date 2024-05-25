@@ -82,6 +82,10 @@ function Trigger2()
     if isTargetDemon and not firstPlayerWithDemonTarget then
       firstPlayerWithDemonTarget = raidUnitName
     end
+
+    if firstPlayerWithDragonTarget and firstPlayerWithDemonTarget then
+      break
+    end
   end
 
   if aura_env.CONTEXT:IsMyName(firstPlayerWithDragonTarget) then
