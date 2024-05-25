@@ -378,10 +378,6 @@ function Init()
   Context:SendPlayersWithSunwellPackSync()
   Context.isInitialized = true
 
-  local function onInitErrorHandler(error)
-
-  end
-
   for i = 1, #Context.onInit do
     local initObj = Context.onInit[i]
     local func, tag = nil, ""
