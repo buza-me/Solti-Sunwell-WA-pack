@@ -24,8 +24,16 @@ function Init()
     Context.sortedNamesOfPlayersWithSunwellPack,
     { Context.SELF_NAME }
   )
+  Context.onInit = Context:UseFallback(
+    Context.onInit,
+    {}
+  )
   Context.roster = Context:UseFallback(
     Context.roster,
+    {}
+  )
+  Context.states = Context:UseFallback(
+    Context.states,
     {}
   )
   Context.pendingAugmentDBM = Context:UseFallback(
@@ -79,12 +87,83 @@ function Init()
     return string.sub(str, 1, #str - #suffix)
   end
 
+  function Context:StringCapitalize(str)
+    return (str:gsub("^%l", string.upper))
+  end
+
+  function Context:StringTrim(str)
+    return (str:gsub("^%s*(.-)%s*$", "%1"))
+  end
+
+  function Context:StringSplit(inputString, separator)
+    if not inputString or not separator then
+      return inputString
+    end
+
+    local result = {}
+    for str in string.gmatch(inputString, "([^" .. separator .. "]+)") do
+      table.insert(result, str)
+    end
+
+    return result
+  end
+
+  function Context:SplitUserInput(inputString)
+    local result = {}
+
+    if not inputString or #inputString == 0 then
+      return result
+    end
+
+    for word in string.gmatch(inputString, '[^%s,]+') do
+      table.insert(
+        result,
+        self:StringCapitalize(string.lower(word))
+      )
+    end
+
+    return result
+  end
+
+  function Context:DeepCopy(source)
+    local sourceType = type(source)
+    local copy
+    if sourceType == 'table' then
+      copy = {}
+      for sourceKey, sourceValue in next, source, nil do
+        copy[self:DeepCopy(sourceKey)] = self:DeepCopy(sourceValue)
+      end
+      setmetatable(copy, self:DeepCopy(getmetatable(source)))
+    else -- number, string, boolean, etc
+      copy = source
+    end
+    return copy
+  end
+
   function Context:IsSelfRaidLead()
     return IsRaidLeader() == 1
   end
 
   function Context:IsSelfRaidAssist()
     return IsRaidOfficer() == 1
+  end
+
+  function Context:IsTalentLearned(tab, talentId)
+    local _, _, _, _, pointsSpent = GetTalentInfo(tab, talentId)
+    if pointsSpent > 0 then return true end
+    return false
+  end
+
+  function Context:IsSelfTank()
+    if UnitClass("player") == "Druid" and GetShapeshiftForm() == 1 and self:IsTalentLearned(2, 5) then --thick hide
+      return true
+    elseif UnitClass("player") == "Warrior" and self:IsTalentLearned(3, 19) then                       --shield slam
+      return true
+    elseif UnitClass("player") == "Paladin" and self:IsTalentLearned(2, 19) then                       --holy shield
+      return true
+    end
+
+    return false
   end
 
   function Context:GetUnitTargetAndGUID(unitName)
@@ -302,6 +381,30 @@ function Init()
   Context:UpdateRoster()
   Context:SendPlayersWithSunwellPackSync()
   Context.isInitialized = true
+
+  local function onInitErrorHandler(error)
+
+  end
+
+  for i = 1, #Context.onInit do
+    local initObj = Context.onInit[i]
+    local func, tag = nil, ""
+    if type(initObj) == "function" then
+      func = initObj
+    end
+    if type(initObj) == "table" then
+      func = initObj.func
+      tag = initObj.tag
+    end
+    if type(func) == "function" then
+      xpcall(
+        func,
+        function(error)
+          print(string.format("|cffFF0000%s tag: %s|r", error, tag))
+        end
+      )
+    end
+  end
 
   -----------------------------------------------------------------------------------
   --------------------------   INIT TRIGGER LOGIC   ---------------------------------
