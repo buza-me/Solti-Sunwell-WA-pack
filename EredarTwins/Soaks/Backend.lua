@@ -10,7 +10,7 @@ function Init()
   aura_env.TRIGGER_EVENT = "SOLTI_SUNWELL_TWINS_SOAK_TRIGGER"
   aura_env.SELF_TRIGGER_EVENT = "SOLTI_SUNWELL_TWINS_SOAK_TRIGGER_SELF"
   aura_env.phase = 1
-  aura_env.soakNumber = 1
+  aura_env.totalSoakNumber = 1
   aura_env.secondPhaseSoakNumber = 1
   aura_env.nextSoakTimerDuration = nil
   aura_env.nextSoakExpirationTime = nil
@@ -153,7 +153,8 @@ function Init()
       self.TRIGGER_EVENT,
       self.currentSoakers,
       self.phase,
-      self.soakNumber,
+      self.totalSoakNumber,
+      self.secondPhaseSoakNumber,
       self.nextSoakTimerDuration,
       self.nextSoakExpirationTime
     )
@@ -164,7 +165,8 @@ function Init()
         ownAssignments.type,
         ownAssignments.zone,
         self.phase,
-        self.soakNumber,
+        self.totalSoakNumber,
+        self.secondPhaseSoakNumber,
         self.nextSoakTimerDuration,
         self.nextSoakExpirationTime
       )
@@ -190,7 +192,7 @@ function Init()
 
   function aura_env:Reset()
     self.phase                  = 1
-    self.soakNumber             = 1
+    self.totalSoakNumber        = 1
     self.secondPhaseSoakNumber  = 1
     self.isInBossFight          = false
     self.debuffedPlayers        = {}
@@ -316,13 +318,13 @@ function Trigger2(
 
         if spellID == env.DEBUFFS["fire affinity"] or spellID == env.DEBUFFS["shadow affinity"] then
           env.phase = 1
-          if env.soakNumber == 1 then
+          if env.totalSoakNumber == 1 then
             env:SetTimerValues(env.CIRCLE_TIMERS.PHASE_ONE.SHORT)
           end
         else
-          env.soakNumber = env.soakNumber + 1
+          env.totalSoakNumber = env.totalSoakNumber + 1
 
-          if env.phase == 1 and env.soakNumber % 2 == 0 then
+          if env.phase == 1 and env.totalSoakNumber % 2 == 0 then
             env:SetTimerValues(env.CIRCLE_TIMERS.PHASE_ONE.MEDIUM)
           elseif env.phase == 1 then
             env:SetTimerValues(env.CIRCLE_TIMERS.PHASE_ONE.LONG)

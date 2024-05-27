@@ -29,9 +29,15 @@ function Init()
 end
 
 -- SOLTI_SUNWELL_TWINS_SOAK_TRIGGER
-function Trigger1(allStates, event, soakers, phase, soakNumber, soakTimerDuration, soakTimerExpirationTime)
-  if not aura_env.CONTEXT.isInitialized then
+function Trigger1(allStates, event, soakers, phase, totalSoakNumber, secondPhaseSoakNumber, duration, expirationTime)
+  if not aura_env.CONTEXT.isInitialized or not soakers then
     return allStates
+  end
+
+  local soakNumber = totalSoakNumber
+
+  if phase == 2 then
+    soakNumber = secondPhaseSoakNumber
   end
 
   if event == "OPTIONS" or not soakers or not phase or not soakNumber then

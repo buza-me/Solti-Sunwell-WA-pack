@@ -6,8 +6,8 @@ function Init()
 end
 
 -- SOLTI_SUNWELL_TWINS_SOAK_TRIGGER_SELF
-function Trigger1(allStates, event, type, zone, phase, soakWave, duration, expirationTime)
-  if event == "OPTIONS" then
+function Trigger1(allStates, event, type, zone, phase, totalSoakNumber, secondPhaseSoakNumber, duration, expirationTime)
+  if event == "OPTIONS" or not type then
     return allStates
   end
 
@@ -22,7 +22,8 @@ function Trigger1(allStates, event, type, zone, phase, soakWave, duration, expir
   state.type = aura_env.TYPES[type]
   state.zone = zone
   state.phase = phase
-  state.soakWave = soakWave
+  state.totalSoakNumber = totalSoakNumber
+  state.secondPhaseSoakNumber = secondPhaseSoakNumber
 
   allStates[""] = state
 
@@ -36,5 +37,6 @@ local trigger1CustomVariables =
   type = "string",
   zone = "number",
   phase = "number",
-  soakWave = "number",
+  totalSoakNumber = "number",
+  secondPhaseSoakNumber = "number",
 }
