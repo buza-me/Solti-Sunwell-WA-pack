@@ -157,7 +157,7 @@ function Init()
   function Context:IsSelfTank()
     local playerClass = UnitClass("player")
 
-    return (playerClass == "Druid" and GetShapeshiftForm() == 1 and self:IsTalentLearned(2, 5))
+    return (playerClass == "Druid" and self:IsTalentLearned(2, 5) --[[and GetShapeshiftForm() == 1]])
         or (playerClass == "Warrior" and self:IsTalentLearned(3, 19))
         or (playerClass == "Paladin" and self:IsTalentLearned(2, 19))
   end
@@ -378,26 +378,6 @@ function Init()
   Context:SendPlayersWithSunwellPackSync()
   Context.isInitialized = true
 
-  for i = 1, #Context.onInit do
-    local initObj = Context.onInit[i]
-    local func, tag = nil, ""
-    if type(initObj) == "function" then
-      func = initObj
-    end
-    if type(initObj) == "table" then
-      func = initObj.func
-      tag = initObj.tag
-    end
-    if type(func) == "function" then
-      xpcall(
-        func,
-        function(error)
-          print(string.format("|cffFF0000%s tag: %s|r", error, tag))
-        end
-      )
-    end
-  end
-
   -----------------------------------------------------------------------------------
   --------------------------   INIT TRIGGER LOGIC   ---------------------------------
   -----------------------------------------------------------------------------------
@@ -471,6 +451,19 @@ function Init()
     end
 
     aura_env.lastGameLoopTime = now
+
+    if #Context.onInit > 0 then
+      local onInit = Context.onInit
+      Context.onInit = {}
+
+      for i = 1, #onInit do
+        local func = onInit[i]
+
+        if type(func) == "function" then
+          func()
+        end
+      end
+    end
 
     for index, timeout in pairs(Context._timeouts.instances) do
       if now >= timeout.executeAt then
