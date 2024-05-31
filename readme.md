@@ -1,4 +1,4 @@
-**Code and import strings updated on May 28 2024, SoltiCore version 0.0.2 used.**
+**Code and import strings updated on May 31 2024, SoltiCore version 0.0.2 is used.**
 
 ### Requirements and recommendations for the WA pack(s). Follow the list order.
 
