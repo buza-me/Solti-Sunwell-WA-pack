@@ -74,11 +74,11 @@ function Init()
   state.TEXT = TEXT
 
   function aura_env:SendAssignments(withChatMessages)
-    if not aura_env.CONTEXT.isInitialized then
+    if not self.CONTEXT.isInitialized then
       return
     end
 
-    if #aura_env.SOAKERS == 0 then
+    if #self.SOAKERS == 0 then
       local SOAKERS = {}
       local assignedPlayers = { { {}, {} }, { {}, {} } }
       local messages = { typos = {}, duplicates = {} }
@@ -93,7 +93,7 @@ function Init()
 
           for zone = 1, #CONFIG_KEYS.ZONES do
             local zoneKey = CONFIG_KEYS.ZONES[zone]
-            local fixedNames = aura_env.CONTEXT:SplitUserInput(aura_env.config[phaseKey][typeKey][zoneKey])
+            local fixedNames = self.CONTEXT:SplitUserInput(self.config[phaseKey][typeKey][zoneKey])
             local filteredNames = {}
 
             for nameIndex = 1, #fixedNames do
@@ -139,10 +139,10 @@ function Init()
         SendChatMessage(table.concat(messages.duplicates, ", "), "RAID")
       end
 
-      aura_env.SOAKERS = SOAKERS
+      self.SOAKERS = SOAKERS
     end
 
-    local SOAKERS = aura_env.SOAKERS
+    local SOAKERS = self.SOAKERS
     local addonMessages = {}
     local chatMessages = {}
 
@@ -170,7 +170,7 @@ function Init()
 
     for i = 1, #addonMessages do
       SendAddonMessage(
-        aura_env.CHAT_MSG_ADDON_PREFIX,
+        self.CHAT_MSG_ADDON_PREFIX,
         addonMessages[i],
         "RAID"
       )
@@ -190,6 +190,19 @@ function Init()
 
     ---@diagnostic disable-next-line: need-check-nil
     state.assignments[phase][type][zone] = names
+  end
+
+  do
+    local env = aura_env
+    env.CONTEXT.onInit = env.CONTEXT.onInit or {}
+
+    table.insert(
+      env.CONTEXT.onInit,
+      function()
+        WeakAuras.ScanEvents(env.UPDATE_TRIGGER_EVENT)
+        env:SendAssignments(false)
+      end
+    )
   end
 end
 

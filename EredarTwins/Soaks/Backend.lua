@@ -3,19 +3,25 @@ function Init()
   LibStub:NewLibrary(LIB_NAME, 1)
   aura_env.CONTEXT = LibStub(LIB_NAME)
 
-  aura_env.BOSS_PHASE_MESSAGE = "Magic Affinity has been disrupted!"
-  aura_env.BOSS_CAST_MESSAGE = "The twins begin to unleash powerful spells!"
   aura_env.FIRST_BOSS_NAME = "Grand Warlock Alythess"
   aura_env.SECOND_BOSS_NAME = "Lady Sacrolash"
+  aura_env.BOSS_PHASE_MESSAGE = "Magic Affinity has been disrupted!"
+  aura_env.PHASE_TWO_SOAK_MESSAGE = "The twins begin to unleash powerful spells!"
+  aura_env.PHASE_ONE_SOAK_MESSAGES = {
+    ["%s begins to cast Blast Nova!"] = true,
+    ["%s begins to summon Shadow Clones!"] = true,
+  }
   aura_env.TRIGGER_EVENT = "SOLTI_SUNWELL_TWINS_SOAK_TRIGGER"
   aura_env.SELF_TRIGGER_EVENT = "SOLTI_SUNWELL_TWINS_SOAK_TRIGGER_SELF"
   aura_env.phase = 1
   aura_env.totalSoakNumber = 1
   aura_env.secondPhaseSoakNumber = 1
+  aura_env.lastAppliedDebuffUpdateTime = GetTime()
+  aura_env.lastRemovedDebuffUpdateTime = GetTime()
+  aura_env.DEBUFF_UPDATE_COOLDOWN = 0.5
   aura_env.nextSoakTimerDuration = nil
   aura_env.nextSoakExpirationTime = nil
   aura_env.isInBossFight = false
-  aura_env.auraApplyTimeoutID = nil
   aura_env.debuffedPlayers = {}
   aura_env.currentSoakers = {}
   aura_env.DEBUFFS = {
@@ -28,24 +34,16 @@ function Init()
     ["fire soak"] = 38637,
     ["shadow soak"] = 38639,
   }
-  -- minus 3 sec
   aura_env.DURATIONS = {
-    ["fire affinity"] = 72,
-    ["shadow affinity"] = 72,
-    ["fire soak"] = 87,
-    ["shadow soak"] = 87,
+    ["fire affinity"] = 75,
+    ["shadow affinity"] = 75,
+    ["fire soak"] = 90,
+    ["shadow soak"] = 90,
   }
   aura_env.CIRCLE_TIMERS = {
-    PHASE_ONE = {
-      SHORT = 14,
-      MEDIUM = 24,
-      LONG = 43
-    },
-    PHASE_TWO = {
-      SHORT = 13.5,
-      MEDIUM = 29.5,
-      LONG = 44.5
-    }
+    SHORT = 14,
+    MEDIUM = 25, -- after cast ends
+    LONG = 40,   -- after cast ends
   }
   aura_env.CIRCLE_CAST_TIME = 5
 
@@ -190,6 +188,52 @@ function Init()
     self.nextSoakExpirationTime = GetTime() + timer
   end
 
+  function aura_env:OnAuraApplied(spellID)
+    if GetTime() - self.lastAppliedDebuffUpdateTime < self.DEBUFF_UPDATE_COOLDOWN then
+      return
+    end
+
+    if not self:IsBossInCombat() then
+      self:Reset()
+      return
+    end
+
+    if spellID == self.DEBUFFS["fire affinity"] or spellID == self.DEBUFFS["shadow affinity"] then
+      self.phase = 1
+      self:SetTimerValues(self.CIRCLE_TIMERS.SHORT)
+    end
+
+    self:UpdateSoakers()
+  end
+
+  function aura_env:OnAuraRemoved()
+    if GetTime() - self.lastRemovedDebuffUpdateTime < self.DEBUFF_UPDATE_COOLDOWN then
+      return
+    end
+
+    if not self:IsBossInCombat() then
+      self:Reset()
+      return
+    end
+
+    self:UpdateSoakers()
+  end
+
+  function aura_env:StartTimerOnCircleCastEnd(timer)
+    local env = aura_env
+    env.CONTEXT:SetTimeout(
+      function()
+        if not env:IsBossInCombat() then
+          env:Reset()
+          return
+        end
+        env:SetTimerValues(timer)
+        env:UpdateSoakers()
+      end,
+      env.CIRCLE_CAST_TIME
+    )
+  end
+
   function aura_env:Reset()
     self.phase                  = 1
     self.totalSoakNumber        = 1
@@ -205,33 +249,38 @@ end
 function Trigger1(event, message, sourceName, languageName, channelName, targetName)
   local shouldAbort =
       event == "OPTIONS"
-      or message ~= aura_env.BOSS_PHASE_MESSAGE
-      and message ~= aura_env.BOSS_CAST_MESSAGE
+      or (
+        message ~= aura_env.BOSS_PHASE_MESSAGE
+        and message ~= aura_env.PHASE_TWO_SOAK_MESSAGE
+        and not aura_env.PHASE_ONE_SOAK_MESSAGES[message]
+      )
 
   if shouldAbort then
     return false
   end
 
   if message == aura_env.BOSS_PHASE_MESSAGE then
-    local env = aura_env
-
-    env.CONTEXT:SetTimeout(
-      function()
-        env.phase = 2
-        env:SetTimerValues(env.CIRCLE_TIMERS.PHASE_TWO.SHORT)
-        env:UpdateSoakers()
-      end,
-      1
-    )
+    aura_env.phase = 2
+    aura_env:SetTimerValues(aura_env.CIRCLE_TIMERS.SHORT)
+    aura_env:UpdateSoakers()
   end
 
-  if message == aura_env.BOSS_CAST_MESSAGE then
+  if message == aura_env.PHASE_TWO_SOAK_MESSAGE then
     aura_env.secondPhaseSoakNumber = aura_env.secondPhaseSoakNumber + 1
+    aura_env.totalSoakNumber = aura_env.totalSoakNumber + 1
 
     if aura_env.secondPhaseSoakNumber % 2 == 0 then
-      aura_env:SetTimerValues(aura_env.CIRCLE_TIMERS.PHASE_TWO.MEDIUM)
+      aura_env:StartTimerOnCircleCastEnd(aura_env.CIRCLE_TIMERS.MEDIUM)
     else
-      aura_env:SetTimerValues(aura_env.CIRCLE_TIMERS.PHASE_TWO.LONG)
+      aura_env:StartTimerOnCircleCastEnd(aura_env.CIRCLE_TIMERS.LONG)
+    end
+  end
+
+  if aura_env.PHASE_ONE_SOAK_MESSAGES[message] then
+    aura_env.totalSoakNumber = aura_env.totalSoakNumber + 1
+
+    if aura_env.totalSoakNumber % 2 == 0 then
+      aura_env:StartTimerOnCircleCastEnd(aura_env.CIRCLE_TIMERS.MEDIUM)
     end
   end
 
@@ -270,73 +319,16 @@ function Trigger2(
     return false
   end
 
-  local env = aura_env
   local now = GetTime()
 
-  env.debuffedPlayers[destName] = env.debuffedPlayers[destName] or {}
+  aura_env.debuffedPlayers[destName] = aura_env.debuffedPlayers[destName] or {}
 
   if subEvent == "SPELL_AURA_REMOVED" then
-    env.debuffedPlayers[destName][spellID] = nil
+    aura_env.debuffedPlayers[destName][spellID] = nil
+    aura_env:OnAuraRemoved()
   else
-    env.debuffedPlayers[destName][spellID] = now + env.DURATIONS[env.DEBUFFS[spellID]]
-  end
-
-  if subEvent == "SPELL_AURA_REMOVED" and not env.auraRemoveTimeoutID then
-    local timeoutID = env.CONTEXT:SetTimeout(
-      function()
-        env.auraRemoveTimeoutID = nil
-
-        if not env:IsBossInCombat() then
-          env:Reset()
-          return
-        end
-
-        env:UpdateSoakers()
-      end,
-      1.1
-    )
-
-    env.auraRemoveTimeoutID = timeoutID
-
-    return
-  end
-
-  if not env.auraApplyTimeoutID then
-    local timeoutID = env.CONTEXT:SetTimeout(
-      function()
-        env.auraApplyTimeoutID = nil
-
-        if env.auraRemoveTimeoutID then
-          env.CONTEXT:ClearTimeout(env.auraRemoveTimeoutID)
-          env.auraRemoveTimeoutID = nil
-        end
-
-        if not env:IsBossInCombat() then
-          env:Reset()
-          return
-        end
-
-        if spellID == env.DEBUFFS["fire affinity"] or spellID == env.DEBUFFS["shadow affinity"] then
-          env.phase = 1
-          if env.totalSoakNumber == 1 then
-            env:SetTimerValues(env.CIRCLE_TIMERS.PHASE_ONE.SHORT)
-          end
-        else
-          env.totalSoakNumber = env.totalSoakNumber + 1
-
-          if env.phase == 1 and env.totalSoakNumber % 2 == 0 then
-            env:SetTimerValues(env.CIRCLE_TIMERS.PHASE_ONE.MEDIUM)
-          elseif env.phase == 1 then
-            env:SetTimerValues(env.CIRCLE_TIMERS.PHASE_ONE.LONG)
-          end
-        end
-
-        env:UpdateSoakers()
-      end,
-      1
-    )
-
-    env.auraApplyTimeoutID = timeoutID
+    aura_env.debuffedPlayers[destName][spellID] = now + aura_env.DURATIONS[aura_env.DEBUFFS[spellID]]
+    aura_env:OnAuraApplied(spellID)
   end
 
   return false

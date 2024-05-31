@@ -3,6 +3,7 @@ function Init()
     "Fire",
     "Shadow",
   }
+  aura_env.CIRCLE_CAST_TIME = 5
 end
 
 -- SOLTI_SUNWELL_TWINS_SOAK_TRIGGER_SELF
@@ -12,6 +13,11 @@ function Trigger1(allStates, event, type, zone, phase, totalSoakNumber, secondPh
   end
 
   duration = duration or 0
+
+  if duration > 0 then
+    duration = duration + aura_env.CIRCLE_CAST_TIME
+    expirationTime = expirationTime + aura_env.CIRCLE_CAST_TIME
+  end
 
   local state = allStates[""] or { autoHide = true, progressType = "timed" }
 
